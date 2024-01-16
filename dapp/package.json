@@ -2,14 +2,20 @@
   "private": true,
   "license": "GPL-3.0",
   "type": "module",
-  "author": {
-    "name": "Doinel Atanasiu",
-    "email": "doinel1atanasiu@gmail.com",
-    "url": "https://business-link.d1a.app"
-  },
+  "contributors": [
+    {
+      "name": "Doinel Atanasiu",
+      "email": "doinel1atanasiu@gmail.com",
+      "url": "https://business-link.d1a.app"
+    },
+    {
+      "name": "Alexe Luca Spataru",
+      "email": "alexe@forgenie.com"
+    }
+  ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/doinel1a/vite-react-ts-shadcn-ui"
+    "url": "https://github.com/doinel1a/hackathon-lfgho"
   },
   "scripts": {
     "postinstall": "playwright install",
