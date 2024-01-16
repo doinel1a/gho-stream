@@ -1,0 +1,28 @@
+{
+	"private": true,
+	"license": "GPL-3.0",
+	"contributors": [
+		{
+			"name": "Doinel Atanasiu",
+			"email": "doinel1atanasiu@gmail.com",
+			"url": "https://business-link.d1a.app"
+		},
+		{
+			"name": "Alexe Luca Spataru",
+			"email": "alexe@forgenie.com"
+		}
+	],
+	"scripts": {
+		"postinstall": "npx husky install",
+		"lint": "cd front-end && npm run lint && cd ../genezio-back-end && npm run lint"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^18.4.4",
+		"@commitlint/config-conventional": "^18.4.4",
+		"husky": "^8.0.3",
+		"lint-staged": "^15.2.0"
+	},
+	"lint-staged": {
+		"dapp/src/**/*.*": ""
+	}
+}
