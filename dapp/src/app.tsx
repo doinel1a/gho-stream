@@ -4,8 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 
 import Footer from './components/footer';
 import Navbar from './components/navbar';
-import ThemeProvider from './components/ui/theme/provider';
 import EStorageKeys from './constants/keys';
+import ThemeProvider from './providers/theme';
 
 function App() {
   return (
