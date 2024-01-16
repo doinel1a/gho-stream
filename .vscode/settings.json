@@ -1,3 +1,11 @@
 {
-	"eslint.workingDirectories": ["./dapp"]
+  "eslint.workingDirectories": ["./dapp"],
+  "[solidity]": {
+    "editor.defaultFormatter": "JuanBlanco.solidity"
+  },
+  "[toml]": {
+    "editor.defaultFormatter": "tamasfe.even-better-toml"
+  },
+  "solidity.formatter": "forge",
+  "solidity.compileUsingRemoteVersion": "v0.8.23+commit.f704f362"
 }
