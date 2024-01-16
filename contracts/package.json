@@ -1,6 +1,22 @@
 {
   "name": "hackathon-lfgho",
   "version": "1.0.0",
+  "license": "GPL-3.0",
+  "contributors": [
+    {
+      "name": "Doinel Atanasiu",
+      "email": "doinel1atanasiu@gmail.com",
+      "url": "https://business-link.d1a.app"
+    },
+    {
+      "name": "Alexe Luca Spataru",
+      "email": "alexe@forgenie.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/doinel1a/hackathon-lfgho"
+  },
   "devDependencies": {
     "prettier": "^3.0.0",
     "solhint": "^3.6.2"
