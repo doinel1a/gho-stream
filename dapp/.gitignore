@@ -1,10 +1,17 @@
 # dependencies
-**/node_modules
+/node_modules
 /.pnp
 .pnp.js
 
+# testing
+/coverage
+/__tests_results__/
+/playwright-report/
+/playwright/.cache/
+
 # production
-dapp/dist
+/dist
+/dist-ssr
 
 # misc
 .DS_Store
@@ -16,11 +23,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-
 # local env files
-**/.env
+.env*.local
 
 # editor directories and files
+.vscode/*
+!.vscode/extensions.json
 .idea
 *.suo
 *.ntvs*
