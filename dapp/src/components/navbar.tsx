@@ -15,7 +15,9 @@ export default function Navbar() {
           <WalletButton className='w-40' />
         </Suspense>
 
-        <ThemeToggle />
+        <Suspense fallback={<Skeleton className='h-10 w-10' />}>
+          <ThemeToggle />
+        </Suspense>
       </div>
     </header>
   );
