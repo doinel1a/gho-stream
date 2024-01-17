@@ -9,11 +9,11 @@ import { Skeleton } from './ui/skeleton';
 interface IImg extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
-  widht: number;
+  width: number;
   height: number;
 }
 
-export default function Img({ src, alt, widht, height, className, ...properties }: IImg) {
+export default function Img({ src, alt, width, height, className, ...properties }: IImg) {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function Img({ src, alt, widht, height, className, ...properties 
     <img
       src={src}
       alt={alt}
-      width={widht}
+      width={width}
       height={height}
       className={cn('', className)}
       {...properties}
