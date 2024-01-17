@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer } from 'react';
+import React, { Suspense, useEffect, useMemo, useReducer } from 'react';
 
 import type { IToken } from '@/interfaces/token';
 import type { BrowserProvider } from 'ethers';
@@ -22,8 +22,11 @@ import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet
 
 import ExpandableSecion from '../../expandable-section';
 import Img from '../../img';
-import { Button } from '../../ui/button';
 import { Skeleton } from '../../ui/skeleton';
+
+const SupplyAssetsDialog = React.lazy(() =>
+  import('./dialog').then((component) => ({ default: component.SupplyAssetsDialog }))
+);
 
 const tableHeaders = ['Assets', 'Wallet balance', ''];
 
@@ -130,7 +133,9 @@ export function SupplyAssetsFunction({
                   <span className='font-semibold'>{token.normalizedBalance}</span>
                 </TableCell>
                 <TableCell className='flex justify-end'>
-                  <Button>Supply</Button>
+                  <Suspense fallback={<Skeleton className='h-10 w-20' />}>
+                    <SupplyAssetsDialog token={token} />
+                  </Suspense>
                 </TableCell>
               </TableRow>
             ))}
