@@ -10,7 +10,7 @@ interface ITokenContract extends ITokenBase {
 }
 
 interface IToken extends ITokenBase {
-  weiBalance: number;
+  weiBalance: bigint;
   normalizedBalance: number;
 }
 

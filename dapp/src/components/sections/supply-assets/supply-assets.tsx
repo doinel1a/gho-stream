@@ -7,6 +7,9 @@ import type { HTMLAttributes } from 'react';
 import { ethers, formatUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
+import ExternalAnchor from '@/components/external-anchor';
+import InfoBanner from '@/components/info-banner';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -63,17 +66,20 @@ export function SupplyAssetsFunction({
           contractDetails.abi,
           ethersProvider
         );
-        const weiTokenBalance = (await tokenContract.balanceOf(address)) as number;
+        const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
+        console.log('weiTokenBalance', weiTokenBalance);
 
-        walletAssets.push({
-          name: contractDetails.name,
-          icon: contractDetails.icon,
-          weiBalance: weiTokenBalance,
-          normalizedBalance: roundDecimal(
-            Number(formatUnits(weiTokenBalance, contractDetails.decimals)),
-            2
-          )
-        });
+        if (weiTokenBalance !== 0n) {
+          walletAssets.push({
+            name: contractDetails.name,
+            icon: contractDetails.icon,
+            weiBalance: weiTokenBalance,
+            normalizedBalance: roundDecimal(
+              Number(formatUnits(weiTokenBalance, contractDetails.decimals)),
+              2
+            )
+          });
+        }
       }
 
       dispatchWalletAssets({
@@ -103,6 +109,21 @@ export function SupplyAssetsFunction({
     >
       {walletAssetsState.isLoading ? (
         <Skeleton className='h-[17rem] w-full' />
+      ) : walletAssetsState.isSuccess && walletAssetsState.tokens?.length === 0 ? (
+        <InfoBanner>
+          <div>
+            Your Ethereum Sepolia wallet is empty. Get free test assets at{' '}
+            <Button
+              variant='link'
+              className='px-0 text-xs text-secondary-foreground underline'
+              asChild
+            >
+              <ExternalAnchor href='https://staging.aave.com/faucet/'>
+                Ethereum Sepolia Faucet
+              </ExternalAnchor>
+            </Button>
+          </div>
+        </InfoBanner>
       ) : (
         <Table>
           <TableHeader>
