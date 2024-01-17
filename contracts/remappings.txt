@@ -3,3 +3,4 @@ forge-std/=lib/forge-std/src/
 ds-test/=lib/forge-std/lib/ds-test/src/
 @sablier=lib/v2-core/src
 @prb/math/=lib/v2-core/node_modules/@prb/math/
+@aave/core-v3=lib/aave-v3-core/
