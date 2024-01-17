@@ -9,7 +9,6 @@ contract BaseTest is Test {
     GhoStreamFacilitator public ghoStreamFacilitator;
 
     function setUp() public {
-        ghoStreamFacilitator =
-            new GhoStreamFacilitator(ISablierV2LockupLinear(0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301));
+        ghoStreamFacilitator = new GhoStreamFacilitator();
     }
 }
