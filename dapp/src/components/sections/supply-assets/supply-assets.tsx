@@ -20,10 +20,10 @@ import EReducerState from '@/constants/reducer-state';
 import { cn, roundDecimal } from '@/lib/utils';
 import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
 
-import ExpandableSecion from '../expandable-section';
-import Img from '../img';
-import { Button } from '../ui/button';
-import { Skeleton } from '../ui/skeleton';
+import ExpandableSecion from '../../expandable-section';
+import Img from '../../img';
+import { Button } from '../../ui/button';
+import { Skeleton } from '../../ui/skeleton';
 
 const tableHeaders = ['Assets', 'Wallet balance', ''];
 
@@ -32,7 +32,7 @@ interface ISupplyAssetsFunction extends HTMLAttributes<HTMLDivElement> {
   defaultExpanded?: boolean;
 }
 
-export default function SupplyAssetsFunction({
+export function SupplyAssetsFunction({
   ethersProvider,
   className,
   defaultExpanded,
