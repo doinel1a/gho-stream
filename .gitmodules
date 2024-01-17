@@ -7,3 +7,6 @@
 [submodule "contracts/lib/v2-core"]
 	path = contracts/lib/v2-core
 	url = https://github.com/sablier-labs/v2-core
+[submodule "contracts/lib/aave-v3-core"]
+	path = contracts/lib/aave-v3-core
+	url = https://github.com/aave/aave-v3-core
