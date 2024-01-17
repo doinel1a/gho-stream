@@ -1,10 +1,11 @@
 import React from 'react';
 
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import Footer from './components/footer';
-import Navbar from './components/navbar';
+import Layout from './components/layout';
 import EStorageKeys from './constants/keys';
+import HomePage from './pages/home';
+import NotFoundPage from './pages/not-found';
 import ConnectKitProvider from './providers/connect-kit';
 import ThemeProvider from './providers/theme';
 
@@ -13,13 +14,12 @@ function App() {
     <BrowserRouter>
       <ThemeProvider defaultTheme='system' storageKey={EStorageKeys.theme}>
         <ConnectKitProvider>
-          <Navbar />
-
-          <main className='flex h-full flex-col items-center justify-center'>
-            <h1 className='text-4xl'>GhoStream | Hackathon LFGHO</h1>
-          </main>
-
-          <Footer />
+          <Layout>
+            <Routes>
+              <Route path='/' element={<HomePage />} />
+              <Route path='*' element={<NotFoundPage />} />
+            </Routes>
+          </Layout>
         </ConnectKitProvider>
       </ThemeProvider>
     </BrowserRouter>
