@@ -30,7 +30,7 @@ interface ISupplyAssetsDialog {
   token: IToken;
   approveTransactionState: TApproveTransactionState;
   supplyTransactionState: TSupplyTransactionState;
-  onApproveClick(contractName: string, amount: string): Promise<void>;
+  onApproveClick(tokenName: string, amount: string): Promise<void>;
   onSupplyClick(tokenName: string, amount: string): Promise<void>;
   dispatchApproveTransaction: React.Dispatch<IApproveTransactionAction>;
   dispatchSupplyTransaction: React.Dispatch<ISupplyTransactionAction>;

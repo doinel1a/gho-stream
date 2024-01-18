@@ -119,15 +119,14 @@ export default function SupplyAssetsSection({
     });
   }, [memoizedGetWalletAssets]);
 
-  // TODO:  RENAME contractName => tokenName
-  async function onApproveClick(contractName: string, amount: string) {
+  async function onApproveClick(tokenName: string, amount: string) {
     dispatchApproveTransaction({
       state: EReducerState.start,
       payload: undefined
     });
 
     for (const contractDetails of tokensContractDetails) {
-      if (contractName !== contractDetails.name) {
+      if (tokenName !== contractDetails.name) {
         continue;
       }
 
