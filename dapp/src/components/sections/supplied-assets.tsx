@@ -180,13 +180,7 @@ export default function SuppliedAssetsSection({
                   </Suspense>
 
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <WithdrawAssetsDialog
-                      token={token}
-                      approveTransactionState={approveTransactionState}
-                      onApproveClick={onApproveClick}
-                      onWithdrawClick={onWithdrawClick}
-                      dispatchApproveTransaction={dispatchApproveTransaction}
-                    />
+                    <WithdrawAssetsDialog token={token} onWithdrawClick={onWithdrawClick} />
                   </Suspense>
                 </TableCell>
               </TableRow>
