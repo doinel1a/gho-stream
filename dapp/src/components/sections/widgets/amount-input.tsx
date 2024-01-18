@@ -4,10 +4,10 @@ import type { IToken } from '@/interfaces/token';
 
 import { X } from 'lucide-react';
 
-import Img from '../img';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import Img from '../../img';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 
 interface IAmountInput {
   id: string;

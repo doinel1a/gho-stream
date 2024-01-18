@@ -1,17 +1,27 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useReducer } from 'react';
 
 import type { IToken } from '@/interfaces/token';
-import type { BrowserProvider } from 'ethers';
+import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
+import { ethers, parseUnits } from 'ethers';
+import { useAccount } from 'wagmi';
+
+import tokensContractDetails from '@/config/contracts';
+import EReducerState from '@/constants/reducer-state';
 import { cn } from '@/lib/utils';
+import {
+  approveTransactionInitialState,
+  approveTransactionReducer
+} from '@/reducers/approve-transaction';
 
 import ExpandableSecion from '../expandable-section';
 import Img from '../img';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
-const SupplyWithdrawAssetsDialog = React.lazy(() => import('./supply-withdraw-assets-dialog'));
+const SupplyAssetsDialog = React.lazy(() => import('./widgets/supply-assets-dialog'));
+const WithdrawAssetsDialog = React.lazy(() => import('./widgets/withdraw-assets-dialog'));
 
 const tableHeaders = ['Assets', 'Balance', ''];
 
@@ -37,6 +47,84 @@ export default function SuppliedAssetsSection({
   ];
   const isLoading = false;
   const isSuccess = true;
+
+  const { address } = useAccount();
+
+  const [approveTransactionState, dispatchApproveTransaction] = useReducer(
+    approveTransactionReducer,
+    approveTransactionInitialState
+  );
+
+  async function onApproveClick(contractName: string, amount: string) {
+    dispatchApproveTransaction({
+      state: EReducerState.start,
+      payload: undefined
+    });
+
+    for (const contractDetails of tokensContractDetails) {
+      if (contractName !== contractDetails.name) {
+        continue;
+      }
+
+      const signer = await ethersProvider.getSigner();
+      const tokenContract = new ethers.Contract(
+        contractDetails.address,
+        contractDetails.abi,
+        signer
+      );
+
+      try {
+        const transactionResponse: TransactionResponse = (await tokenContract.approve(
+          address,
+          parseUnits(amount, contractDetails.decimals)
+        )) as TransactionResponse;
+
+        console.log('transactionResponse', transactionResponse);
+
+        const transactionReceipt = await transactionResponse.wait();
+        console.log('transactionReceipt', transactionReceipt);
+
+        if (transactionReceipt) {
+          dispatchApproveTransaction({
+            state: EReducerState.success,
+            payload: undefined
+          });
+        }
+      } catch (error: unknown) {
+        // Ethers error object
+        if (
+          error &&
+          typeof error === 'object' &&
+          'info' in error &&
+          error.info &&
+          typeof error.info === 'object' &&
+          'error' in error.info &&
+          error.info.error &&
+          typeof error.info.error === 'object' &&
+          'code' in error.info.error &&
+          typeof error.info.error.code === 'number'
+        ) {
+          dispatchApproveTransaction({
+            state: EReducerState.error,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            payload: error.info.error.code
+          });
+        }
+
+        console.error('Error approve transaction', error);
+      }
+    }
+  }
+
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  async function onSupplyClick() {
+    console.log('SUPPLY');
+  }
+
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  async function onWithdrawClick() {
+    console.log('WITHDRAW');
+  }
 
   return (
     <ExpandableSecion
@@ -81,15 +169,23 @@ export default function SuppliedAssetsSection({
                   <span className='font-semibold'>{token.normalizedBalance}</span>
                 </TableCell>
                 <TableCell className='flex justify-end gap-x-2.5'>
-                  <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog id='supplied-assets' token={token} isSupply />
+                  <Suspense fallback={<Skeleton className='h-10 w-16' />}>
+                    <SupplyAssetsDialog
+                      token={token}
+                      approveTransactionState={approveTransactionState}
+                      onApproveClick={onApproveClick}
+                      onSupplyClick={onSupplyClick}
+                      dispatchApproveTransaction={dispatchApproveTransaction}
+                    />
                   </Suspense>
 
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog
-                      id='withdraw-assets'
+                    <WithdrawAssetsDialog
                       token={token}
-                      isSupply={false}
+                      approveTransactionState={approveTransactionState}
+                      onApproveClick={onApproveClick}
+                      onWithdrawClick={onWithdrawClick}
+                      dispatchApproveTransaction={dispatchApproveTransaction}
                     />
                   </Suspense>
                 </TableCell>

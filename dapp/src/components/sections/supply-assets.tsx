@@ -1,10 +1,10 @@
 import React, { Suspense, useEffect, useMemo, useReducer } from 'react';
 
 import type { IToken } from '@/interfaces/token';
-import type { BrowserProvider } from 'ethers';
+import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
-import { ethers, formatUnits } from 'ethers';
+import { ethers, formatUnits, parseUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
 import ExternalAnchor from '@/components/external-anchor';
@@ -21,32 +21,41 @@ import {
 import tokensContractDetails from '@/config/contracts';
 import EReducerState from '@/constants/reducer-state';
 import { cn, roundDecimal } from '@/lib/utils';
+import {
+  approveTransactionInitialState,
+  approveTransactionReducer
+} from '@/reducers/approve-transaction';
 import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
 
 import ExpandableSecion from '../expandable-section';
 import Img from '../img';
 import { Skeleton } from '../ui/skeleton';
 
-const SupplyWithdrawAssetsDialog = React.lazy(() => import('./supply-withdraw-assets-dialog'));
+const SupplyAssetsDialog = React.lazy(() => import('./widgets/supply-assets-dialog'));
 
 const tableHeaders = ['Assets', 'Wallet balance', ''];
 
-interface ISupplyAssetsFunction extends HTMLAttributes<HTMLDivElement> {
+interface ISupplyAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   defaultExpanded?: boolean;
 }
 
-export default function SupplyAssetsFunction({
+export default function SupplyAssetsSection({
   ethersProvider,
   className,
   defaultExpanded,
   ...properties
-}: ISupplyAssetsFunction) {
+}: ISupplyAssetsSection) {
   const { address } = useAccount();
 
   const [walletAssetsState, dispatchWalletAssets] = useReducer(
     walletAssetsReducer,
     walletAssetsInitialState
+  );
+
+  const [approveTransactionState, dispatchApproveTransaction] = useReducer(
+    approveTransactionReducer,
+    approveTransactionInitialState
   );
 
   const memoizedGetWalletAssets = useMemo(() => {
@@ -99,6 +108,72 @@ export default function SupplyAssetsFunction({
       console.error('Error fetching token balance', error);
     });
   }, [memoizedGetWalletAssets]);
+
+  async function onApproveClick(contractName: string, amount: string) {
+    dispatchApproveTransaction({
+      state: EReducerState.start,
+      payload: undefined
+    });
+
+    for (const contractDetails of tokensContractDetails) {
+      if (contractName !== contractDetails.name) {
+        continue;
+      }
+
+      const signer = await ethersProvider.getSigner();
+      const tokenContract = new ethers.Contract(
+        contractDetails.address,
+        contractDetails.abi,
+        signer
+      );
+
+      try {
+        const transactionResponse: TransactionResponse = (await tokenContract.approve(
+          address,
+          parseUnits(amount, contractDetails.decimals)
+        )) as TransactionResponse;
+
+        console.log('transactionResponse', transactionResponse);
+
+        const transactionReceipt = await transactionResponse.wait();
+        console.log('transactionReceipt', transactionReceipt);
+
+        if (transactionReceipt) {
+          dispatchApproveTransaction({
+            state: EReducerState.success,
+            payload: undefined
+          });
+        }
+      } catch (error: unknown) {
+        // Ethers error object
+        if (
+          error &&
+          typeof error === 'object' &&
+          'info' in error &&
+          error.info &&
+          typeof error.info === 'object' &&
+          'error' in error.info &&
+          error.info.error &&
+          typeof error.info.error === 'object' &&
+          'code' in error.info.error &&
+          typeof error.info.error.code === 'number'
+        ) {
+          dispatchApproveTransaction({
+            state: EReducerState.error,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            payload: error.info.error.code
+          });
+        }
+
+        console.error('Error approve transaction', error);
+      }
+    }
+  }
+
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  async function onSupplyClick() {
+    console.log('SUPPLY');
+  }
 
   return (
     <ExpandableSecion
@@ -154,8 +229,14 @@ export default function SupplyAssetsFunction({
                   <span className='font-semibold'>{token.normalizedBalance}</span>
                 </TableCell>
                 <TableCell className='flex justify-end'>
-                  <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog id='supply-assets' token={token} isSupply />
+                  <Suspense fallback={<Skeleton className='h-10 w-16' />}>
+                    <SupplyAssetsDialog
+                      token={token}
+                      approveTransactionState={approveTransactionState}
+                      onApproveClick={onApproveClick}
+                      onSupplyClick={onSupplyClick}
+                      dispatchApproveTransaction={dispatchApproveTransaction}
+                    />
                   </Suspense>
                 </TableCell>
               </TableRow>

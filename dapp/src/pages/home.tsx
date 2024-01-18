@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
-const SupplyAssetsFunction = React.lazy(() => import('@/components/sections/supply-assets'));
+const SupplyAssetsSection = React.lazy(() => import('@/components/sections/supply-assets'));
 const SuppliedAssetsSection = React.lazy(() => import('@/components/sections/supplied-assets'));
 
 export default function HomePage() {
@@ -28,7 +28,7 @@ export default function HomePage() {
         isConnected ? (
           <div className='flex w-full items-start gap-5'>
             <Suspense fallback={<Skeleton className='h-52 w-1/2' />}>
-              <SupplyAssetsFunction
+              <SupplyAssetsSection
                 ethersProvider={ethersProvider}
                 className='w-1/2'
                 defaultExpanded
