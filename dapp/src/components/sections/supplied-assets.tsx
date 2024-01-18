@@ -19,6 +19,10 @@ import {
   supplyTransactionInitialState,
   supplyTransactionReducer
 } from '@/reducers/supply-transaction';
+import {
+  withdrawTransactionInitialState,
+  withdrawTransactionReducer
+} from '@/reducers/withdraw-transaction';
 
 import ExpandableSecion from '../expandable-section';
 import Img from '../img';
@@ -63,6 +67,11 @@ export default function SuppliedAssetsSection({
   const [supplyTransactionState, dispatchSupplyTransaction] = useReducer(
     supplyTransactionReducer,
     supplyTransactionInitialState
+  );
+
+  const [withdrawTransactionState, dispatchWithdrawTransaction] = useReducer(
+    withdrawTransactionReducer,
+    withdrawTransactionInitialState
   );
 
   async function onApproveClick(contractName: string, amount: string) {
@@ -140,7 +149,7 @@ export default function SuppliedAssetsSection({
       const signer = await ethersProvider.getSigner();
       const aaveContract = new ethers.Contract(
         aaveContractDetails.address,
-        aaveContractDetails.abi.abi,
+        aaveContractDetails.artifacts.abi,
         signer
       );
 
@@ -186,9 +195,64 @@ export default function SuppliedAssetsSection({
     }
   }
 
-  // eslint-disable-next-line unicorn/consistent-function-scoping
-  async function onWithdrawClick() {
-    console.log('WITHDRAW');
+  async function onWithdrawClick(tokenName: string, amount: string) {
+    dispatchWithdrawTransaction({
+      state: EReducerState.start,
+      payload: undefined
+    });
+
+    for (const contractDetails of tokensContractDetails) {
+      if (tokenName !== contractDetails.name) {
+        continue;
+      }
+
+      const signer = await ethersProvider.getSigner();
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.artifacts.abi,
+        signer
+      );
+
+      try {
+        const transactionResponse: TransactionResponse = (await aaveContract.withdraw(
+          contractDetails.address,
+          parseUnits(amount, contractDetails.decimals)
+        )) as TransactionResponse;
+
+        console.log('transactionResponse', transactionResponse);
+
+        const transactionReceipt = await transactionResponse.wait();
+        console.log('transactionReceipt', transactionReceipt);
+
+        if (transactionReceipt) {
+          dispatchWithdrawTransaction({
+            state: EReducerState.success,
+            payload: undefined
+          });
+        }
+      } catch (error: unknown) {
+        // Ethers error object
+        if (
+          error &&
+          typeof error === 'object' &&
+          'info' in error &&
+          error.info &&
+          typeof error.info === 'object' &&
+          'error' in error.info &&
+          error.info.error &&
+          typeof error.info.error === 'object' &&
+          'code' in error.info.error &&
+          typeof error.info.error.code === 'number'
+        ) {
+          dispatchWithdrawTransaction({
+            state: EReducerState.error,
+            payload: error.info.error.code
+          });
+        }
+
+        console.error('Error deposit transaction', error);
+      }
+    }
   }
 
   return (
@@ -247,7 +311,12 @@ export default function SuppliedAssetsSection({
                   </Suspense>
 
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <WithdrawAssetsDialog token={token} onWithdrawClick={onWithdrawClick} />
+                    <WithdrawAssetsDialog
+                      token={token}
+                      withdrawTransactionState={withdrawTransactionState}
+                      onWithdrawClick={onWithdrawClick}
+                      dispatchWithdrawTransaction={dispatchWithdrawTransaction}
+                    />
                   </Suspense>
                 </TableCell>
               </TableRow>

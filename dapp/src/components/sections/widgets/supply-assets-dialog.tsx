@@ -10,8 +10,6 @@ import type {
   TSupplyTransactionState
 } from '@/reducers/supply-transaction';
 
-import { Check } from 'lucide-react';
-
 import ErrorBanner from '@/components/error-banner';
 import LoadingButton from '@/components/loading-button';
 import { Button } from '@/components/ui/button';
@@ -25,6 +23,7 @@ import {
 import EReducerState from '@/constants/reducer-state';
 
 import AmountInput from './amount-input';
+import SuccessfulTransaction from './successful-transaction';
 
 interface ISupplyAssetsDialog {
   token: IToken;
@@ -60,6 +59,7 @@ export default function SupplyAssetsDialog({
   useEffect(() => {
     if (!isDialogOpen) {
       setAmount('');
+
       dispatchApproveTransaction({
         state: EReducerState.reset,
         payload: undefined
@@ -71,10 +71,6 @@ export default function SupplyAssetsDialog({
       });
     }
   }, [isDialogOpen, dispatchApproveTransaction, dispatchSupplyTransaction]);
-
-  useEffect(() => {
-    console.log('amount', amount);
-  }, [amount]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -89,27 +85,13 @@ export default function SupplyAssetsDialog({
         )}
 
         {supplyTransactionState.isSuccess ? (
-          <div className='flex flex-col gap-y-5'>
-            <div className='flex flex-col items-center gap-y-1'>
-              <span className='mb-2.5 rounded-full bg-secondary p-2.5'>
-                <Check className='h-5 w-5 text-green-500' />
-              </span>
-
-              <h2 className='text-xl font-semibold'>All done!</h2>
-              <h3>
-                You supplied {amount} {token.name}
-              </h3>
-            </div>
-
-            <Button onClick={() => setIsDialogOpen((previousState) => !previousState)}>
-              Ok, close
-            </Button>
-          </div>
+          <SuccessfulTransaction
+            content={`You supplied ${amount} ${token.name}`}
+            onCloseClick={() => setIsDialogOpen((previousState) => !previousState)}
+          />
         ) : (
           <>
-            <div className='flex items-center space-x-2'>
-              <AmountInput id='supply-assets' token={token} amount={amount} setAmount={setAmount} />
-            </div>
+            <AmountInput id='supply-assets' token={token} amount={amount} setAmount={setAmount} />
 
             {(approveTransactionState.isError || supplyTransactionState.isError) && (
               <ErrorBanner>{errorMessage}</ErrorBanner>
