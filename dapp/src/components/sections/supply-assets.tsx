@@ -194,7 +194,7 @@ export default function SupplyAssetsSection({
       const signer = await ethersProvider.getSigner();
       const aaveContract = new ethers.Contract(
         aaveContractDetails.address,
-        aaveContractDetails.abi.abi,
+        aaveContractDetails.artifacts.abi,
         signer
       );
 
