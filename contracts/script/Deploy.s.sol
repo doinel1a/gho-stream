@@ -25,13 +25,14 @@ contract DeployScript is Script {
         tokens.push(WETH);
         tokens.push(DAI);
         tokens.push(USDC);
+
+        aTokens.push(IAToken(0xaC775C0b34c50Ba68bBC0e4F3c9aCCaf34123eda));
+        aTokens.push(IAToken(0x72CB9080841acB75E5AB9d83E5F78a3d20326e6A));
+        aTokens.push(IAToken(0x915790Fe8cc10Acf844CB77F8DC3299d4E3be78a));
     }
 
     function run() public {
         vm.startBroadcast(deployer);
-        aTokens.push(IAToken(address(new MockAToken("AWETH", "AWETH", 18))));
-        aTokens.push(IAToken(address(new MockAToken("ADAI", "ADAI", 18))));
-        aTokens.push(IAToken(address(new MockAToken("AUSDC", "AUSDC", 6))));
 
         AaveMiniMarket market = new AaveMiniMarket(tokens, aTokens);
 
