@@ -18,7 +18,12 @@ export default function WalletButton({ className, ...properties }: IWalletButton
   const displayAddress = address?.slice(0, 8) + '...' + address?.slice(-8);
 
   return (
-    <Button className={cn(className)} onClick={() => setOpen(true)} {...properties}>
+    <Button
+      variant='secondary'
+      className={cn(className)}
+      onClick={() => setOpen(true)}
+      {...properties}
+    >
       {isConnected ? displayAddress : 'Connect Wallet'}
     </Button>
   );
