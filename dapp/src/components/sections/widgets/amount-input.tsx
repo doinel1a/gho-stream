@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import type { IToken } from '@/interfaces/token';
 
@@ -17,12 +17,6 @@ interface IAmountInput {
 }
 
 export default function AmountInput({ id, token, amount, setAmount }: IAmountInput) {
-  useEffect(() => {
-    return () => {
-      setAmount('');
-    };
-  }, [setAmount]);
-
   return (
     <div className='grid flex-1 gap-2'>
       <Label htmlFor={id} className='text-base'>
