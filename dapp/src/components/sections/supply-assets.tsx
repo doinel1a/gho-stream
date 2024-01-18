@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import aaveContractDetails from '@/config/aave-contract-details';
 import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
 import { cn, roundDecimal } from '@/lib/utils';
@@ -129,7 +130,7 @@ export default function SupplyAssetsSection({
 
       try {
         const transactionResponse: TransactionResponse = (await tokenContract.approve(
-          address,
+          aaveContractDetails.address,
           parseUnits(amount, contractDetails.decimals)
         )) as TransactionResponse;
 
