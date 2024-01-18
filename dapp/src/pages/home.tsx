@@ -7,11 +7,7 @@ import { useAccount } from 'wagmi';
 
 import { Skeleton } from '@/components/ui/skeleton';
 
-const SupplyAssetsFunction = React.lazy(() =>
-  import('../components/sections/supply-assets/supply-assets').then((component) => ({
-    default: component.SupplyAssetsFunction
-  }))
-);
+const SupplyAssetsFunction = React.lazy(() => import('@/components/sections/supply-assets'));
 
 export default function HomePage() {
   const { isConnected } = useAccount();

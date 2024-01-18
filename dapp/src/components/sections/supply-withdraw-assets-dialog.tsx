@@ -11,7 +11,7 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 
-import AmountInput from '../amount-input';
+import AmountInput from './amount-input';
 
 interface ISupplyAssetsDialog {
   token: IToken;

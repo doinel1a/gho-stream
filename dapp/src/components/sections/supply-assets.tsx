@@ -23,13 +23,11 @@ import EReducerState from '@/constants/reducer-state';
 import { cn, roundDecimal } from '@/lib/utils';
 import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
 
-import ExpandableSecion from '../../expandable-section';
-import Img from '../../img';
-import { Skeleton } from '../../ui/skeleton';
+import ExpandableSecion from '../expandable-section';
+import Img from '../img';
+import { Skeleton } from '../ui/skeleton';
 
-const SupplyAssetsDialog = React.lazy(() =>
-  import('./dialog').then((component) => ({ default: component.SupplyAssetsDialog }))
-);
+const SupplyWithdrawAssetsDialog = React.lazy(() => import('./supply-withdraw-assets-dialog'));
 
 const tableHeaders = ['Assets', 'Wallet balance', ''];
 
@@ -155,7 +153,7 @@ export function SupplyAssetsFunction({
                 </TableCell>
                 <TableCell className='flex justify-end'>
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyAssetsDialog token={token} />
+                    <SupplyWithdrawAssetsDialog token={token} />
                   </Suspense>
                 </TableCell>
               </TableRow>
