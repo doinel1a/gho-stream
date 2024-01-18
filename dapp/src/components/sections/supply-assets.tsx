@@ -27,7 +27,7 @@ import ExpandableSecion from '../expandable-section';
 import Img from '../img';
 import { Skeleton } from '../ui/skeleton';
 
-const SupplyWithdrawAssetsDialog = React.lazy(() => import('./supply-withdraw-assets-dialog'));
+const SupplyAssetsDialog = React.lazy(() => import('./widgets/supply-assets-dialog'));
 
 const tableHeaders = ['Assets', 'Wallet balance', ''];
 
@@ -155,7 +155,7 @@ export default function SupplyAssetsSection({
                 </TableCell>
                 <TableCell className='flex justify-end'>
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog id='supply-assets' token={token} isSupply />
+                    <SupplyAssetsDialog id='supply-assets' token={token} isSupply />
                   </Suspense>
                 </TableCell>
               </TableRow>

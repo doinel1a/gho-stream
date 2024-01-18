@@ -19,7 +19,7 @@ interface ISupplyAssetsDialog {
   isSupply: boolean;
 }
 
-export default function SupplyWithdrawAssetsDialog({ id, token, isSupply }: ISupplyAssetsDialog) {
+export default function SupplyAssetsDialog({ id, token, isSupply }: ISupplyAssetsDialog) {
   const [amount, setAmount] = useState('');
 
   const isInputValid = amount !== '' && amount !== '0';

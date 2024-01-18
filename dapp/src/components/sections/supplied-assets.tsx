@@ -11,7 +11,8 @@ import Img from '../img';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
-const SupplyWithdrawAssetsDialog = React.lazy(() => import('./supply-withdraw-assets-dialog'));
+const SupplyAssetsDialog = React.lazy(() => import('./widgets/supply-assets-dialog'));
+const WithdrawAssetsDialog = React.lazy(() => import('./widgets/withdraw-assets-dialog'));
 
 const tableHeaders = ['Assets', 'Balance', ''];
 
@@ -82,15 +83,11 @@ export default function SuppliedAssetsSection({
                 </TableCell>
                 <TableCell className='flex justify-end gap-x-2.5'>
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog id='supplied-assets' token={token} isSupply />
+                    <SupplyAssetsDialog id='supplied-assets' token={token} isSupply />
                   </Suspense>
 
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog
-                      id='withdraw-assets'
-                      token={token}
-                      isSupply={false}
-                    />
+                    <WithdrawAssetsDialog id='withdraw-assets' token={token} isSupply={false} />
                   </Suspense>
                 </TableCell>
               </TableRow>
