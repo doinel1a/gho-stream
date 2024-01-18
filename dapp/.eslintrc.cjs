@@ -56,7 +56,8 @@ module.exports = {
     // end
 
     // unicord
-    'unicorn/no-null': 'off'
+    'unicorn/no-null': 'off',
+    'unicorn/no-useless-undefined': 'off'
     // end
   }
 };

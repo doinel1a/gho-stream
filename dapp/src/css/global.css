@@ -64,6 +64,6 @@
   }
 
   #root {
-    @apply flex h-full w-full flex-col;
+    @apply flex h-full w-full flex-col items-center;
   }
 }

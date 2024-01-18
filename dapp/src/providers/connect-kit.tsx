@@ -6,15 +6,19 @@ import type { PropsWithChildren } from 'react';
 
 import { ConnectKitProvider as FamilyConnectKitProvider, getDefaultConfig } from 'connectkit';
 import { createConfig, WagmiConfig } from 'wagmi';
+import { sepolia } from 'wagmi/chains';
 
 import { useTheme } from './theme';
 
-const config = createConfig(
+const chains = [sepolia];
+
+export const config = createConfig(
   getDefaultConfig({
     appName: 'Your App Name',
     appDescription: 'Your App Description',
     appIcon: 'https://family.co/logo.png',
     appUrl: 'https://family.co',
+    chains,
     walletConnectProjectId: (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? '') as string
   })
 );
