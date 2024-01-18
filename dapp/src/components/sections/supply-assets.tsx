@@ -31,17 +31,17 @@ const SupplyWithdrawAssetsDialog = React.lazy(() => import('./supply-withdraw-as
 
 const tableHeaders = ['Assets', 'Wallet balance', ''];
 
-interface ISupplyAssetsFunction extends HTMLAttributes<HTMLDivElement> {
+interface ISupplyAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   defaultExpanded?: boolean;
 }
 
-export default function SupplyAssetsFunction({
+export default function SupplyAssetsSection({
   ethersProvider,
   className,
   defaultExpanded,
   ...properties
-}: ISupplyAssetsFunction) {
+}: ISupplyAssetsSection) {
   const { address } = useAccount();
 
   const [walletAssetsState, dispatchWalletAssets] = useReducer(
