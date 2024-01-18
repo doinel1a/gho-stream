@@ -26,6 +26,10 @@ import {
   approveTransactionInitialState,
   approveTransactionReducer
 } from '@/reducers/approve-transaction';
+import {
+  supplyTransactionInitialState,
+  supplyTransactionReducer
+} from '@/reducers/supply-transaction';
 import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
 
 import ExpandableSecion from '../expandable-section';
@@ -57,6 +61,11 @@ export default function SupplyAssetsSection({
   const [approveTransactionState, dispatchApproveTransaction] = useReducer(
     approveTransactionReducer,
     approveTransactionInitialState
+  );
+
+  const [supplyTransactionState, dispatchSupplyTransaction] = useReducer(
+    supplyTransactionReducer,
+    supplyTransactionInitialState
   );
 
   const memoizedGetWalletAssets = useMemo(() => {
@@ -110,6 +119,7 @@ export default function SupplyAssetsSection({
     });
   }, [memoizedGetWalletAssets]);
 
+  // TODO:  RENAME contractName => tokenName
   async function onApproveClick(contractName: string, amount: string) {
     dispatchApproveTransaction({
       state: EReducerState.start,
@@ -171,9 +181,64 @@ export default function SupplyAssetsSection({
     }
   }
 
-  // eslint-disable-next-line unicorn/consistent-function-scoping
-  async function onSupplyClick() {
-    console.log('SUPPLY');
+  async function onSupplyClick(tokenName: string, amount: string) {
+    dispatchSupplyTransaction({
+      state: EReducerState.start,
+      payload: undefined
+    });
+
+    for (const contractDetails of tokensContractDetails) {
+      if (tokenName !== contractDetails.name) {
+        continue;
+      }
+
+      const signer = await ethersProvider.getSigner();
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.abi.abi,
+        signer
+      );
+
+      try {
+        const transactionResponse: TransactionResponse = (await aaveContract.deposit(
+          contractDetails.address,
+          parseUnits(amount, contractDetails.decimals)
+        )) as TransactionResponse;
+
+        console.log('transactionResponse', transactionResponse);
+
+        const transactionReceipt = await transactionResponse.wait();
+        console.log('transactionReceipt', transactionReceipt);
+
+        if (transactionReceipt) {
+          dispatchSupplyTransaction({
+            state: EReducerState.success,
+            payload: undefined
+          });
+        }
+      } catch (error: unknown) {
+        // Ethers error object
+        if (
+          error &&
+          typeof error === 'object' &&
+          'info' in error &&
+          error.info &&
+          typeof error.info === 'object' &&
+          'error' in error.info &&
+          error.info.error &&
+          typeof error.info.error === 'object' &&
+          'code' in error.info.error &&
+          typeof error.info.error.code === 'number'
+        ) {
+          dispatchSupplyTransaction({
+            state: EReducerState.error,
+            payload: error.info.error.code
+          });
+        }
+
+        console.error('Error deposit transaction', error);
+      }
+    }
   }
 
   return (
@@ -234,9 +299,11 @@ export default function SupplyAssetsSection({
                     <SupplyAssetsDialog
                       token={token}
                       approveTransactionState={approveTransactionState}
+                      supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
                       dispatchApproveTransaction={dispatchApproveTransaction}
+                      dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
                   </Suspense>
                 </TableCell>
