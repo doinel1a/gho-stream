@@ -25,14 +25,13 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
     using SafeERC20 for IERC20;
 
     // Sepolia Addresses
-    IERC20 public immutable GHO = IERC20(0xc4bF5CbDaBE595361438F8c6a187bDc330539c60);
+    IGhoToken public immutable GHO = IGhoToken(0xc4bF5CbDaBE595361438F8c6a187bDc330539c60);
     ISablierV2LockupLinear public immutable SABLIER_LOCKUP_LINEAR =
         ISablierV2LockupLinear(0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301);
 
     mapping(address borrower => EnumerableSet.UintSet streamIds) private _borrowerStreamIds;
 
     address internal _treasury;
-    address internal _underlyingAsset;
 
     // Gho Storage
     GhoStreamVariableDebtToken internal _ghoVariableDebtToken;
@@ -46,7 +45,7 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
     function initialize(
         IPool initializingPool,
         address treasury,
-        address underlyingAsset,
+        address,
         IAaveIncentivesController incentivesController,
         uint8 aTokenDecimals,
         string calldata aTokenName,
@@ -61,14 +60,13 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
         _setDecimals(aTokenDecimals);
 
         _treasury = treasury;
-        _underlyingAsset = underlyingAsset;
         _incentivesController = incentivesController;
     }
 
     /// @inheritdoc IAToken
     function transferUnderlyingTo(address target, uint256 amount) external {
         // TODO: take 40 bits from amount and decode duration
-        IGhoToken(_underlyingAsset).mint(address(this), amount);
+        GHO.mint(address(this), amount);
 
         _createGhoStream(uint128(amount), 1 weeks, target);
     }
@@ -87,7 +85,7 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
 
     /// @inheritdoc IAToken
     function rescueTokens(address token, address to, uint256 amount) external {
-        require(token != _underlyingAsset, Errors.UNDERLYING_CANNOT_BE_RESCUED);
+        require(token != address(GHO), Errors.UNDERLYING_CANNOT_BE_RESCUED);
         IERC20(token).safeTransfer(to, amount);
     }
 
@@ -97,7 +95,7 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
 
     /// @inheritdoc IAToken
     function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
-        return _underlyingAsset;
+        return address(GHO);
     }
 
     /// @inheritdoc IAToken
@@ -122,9 +120,9 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
 
     /// @inheritdoc IGhoFacilitator
     function distributeFeesToTreasury() external virtual {
-        uint256 balance = IERC20(_underlyingAsset).balanceOf(address(this));
-        IERC20(_underlyingAsset).transfer(_ghoTreasury, balance);
-        emit FeesDistributedToTreasury(_ghoTreasury, _underlyingAsset, balance);
+        uint256 balance = GHO.balanceOf(address(this));
+        GHO.transfer(_ghoTreasury, balance);
+        emit FeesDistributedToTreasury(_ghoTreasury, address(GHO), balance);
     }
 
     /// @inheritdoc IGhoFacilitator
