@@ -7,7 +7,7 @@ import type { HTMLAttributes } from 'react';
 import { ethers, parseUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
-import tokensContractDetails from '@/config/contracts';
+import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
 import { cn } from '@/lib/utils';
 import {

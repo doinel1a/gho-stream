@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import tokensContractDetails from '@/config/contracts';
+import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
 import { cn, roundDecimal } from '@/lib/utils';
 import {
