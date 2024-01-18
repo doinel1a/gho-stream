@@ -36,7 +36,7 @@ interface ISupplyAssetsFunction extends HTMLAttributes<HTMLDivElement> {
   defaultExpanded?: boolean;
 }
 
-export function SupplyAssetsFunction({
+export default function SupplyAssetsFunction({
   ethersProvider,
   className,
   defaultExpanded,
@@ -79,6 +79,8 @@ export function SupplyAssetsFunction({
           });
         }
       }
+
+      console.log('walletAssets', walletAssets);
 
       dispatchWalletAssets({
         state: EReducerState.success,
@@ -153,7 +155,7 @@ export function SupplyAssetsFunction({
                 </TableCell>
                 <TableCell className='flex justify-end'>
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
-                    <SupplyWithdrawAssetsDialog token={token} />
+                    <SupplyWithdrawAssetsDialog id='supply-assets' token={token} isSupply />
                   </Suspense>
                 </TableCell>
               </TableRow>
