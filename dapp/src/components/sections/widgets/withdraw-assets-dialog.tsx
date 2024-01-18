@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { IToken } from '@/interfaces/token';
+import type {
+  IWithdrawTransactionAction,
+  TWithdrawTransactionState
+} from '@/reducers/withdraw-transaction';
 
+import ErrorBanner from '@/components/error-banner';
+import LoadingButton from '@/components/loading-button';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,19 +16,45 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
+import EReducerState from '@/constants/reducer-state';
 
 import AmountInput from './amount-input';
+import SuccessfulTransaction from './successful-transaction';
 
 interface IWithdrawAssetsSection {
   token: IToken;
-  onWithdrawClick: () => void;
+  withdrawTransactionState: TWithdrawTransactionState;
+  onWithdrawClick(tokenName: string, amount: string): Promise<void>;
+  dispatchWithdrawTransaction: React.Dispatch<IWithdrawTransactionAction>;
 }
 
-export default function WithdrawAssetsSection({ token, onWithdrawClick }: IWithdrawAssetsSection) {
+export default function WithdrawAssetsSection({
+  token,
+  withdrawTransactionState,
+  onWithdrawClick,
+  dispatchWithdrawTransaction
+}: IWithdrawAssetsSection) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
   const isInputValid = amount !== '' && amount !== '0';
+
+  const errorMessage = withdrawTransactionState.errorCode
+    ? withdrawTransactionState.errorCode === 4001
+      ? 'You cancelled the transaction.'
+      : 'Error with your transaction.'
+    : 'Error with your transaction.';
+
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setAmount('');
+
+      dispatchWithdrawTransaction({
+        state: EReducerState.reset,
+        payload: undefined
+      });
+    }
+  }, [isDialogOpen, dispatchWithdrawTransaction]);
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -32,18 +64,32 @@ export default function WithdrawAssetsSection({ token, onWithdrawClick }: IWithd
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>
-        <DialogHeader>
-          <DialogTitle>Withdraw {token.name}</DialogTitle>
-        </DialogHeader>
-        <div className='flex items-center space-x-2'>
-          <AmountInput id='withdraw-assets' token={token} amount={amount} setAmount={setAmount} />
-        </div>
+        {!withdrawTransactionState.isSuccess && (
+          <DialogHeader>
+            <DialogTitle>Withdraw {token.name}</DialogTitle>
+          </DialogHeader>
+        )}
 
-        <div className='flex w-full flex-col gap-y-2.5'>
-          <Button disabled={!isInputValid} onClick={onWithdrawClick}>
-            {isInputValid ? <span>Withdraw {token.name}</span> : <span>Enter an amount</span>}
-          </Button>
-        </div>
+        {withdrawTransactionState.isSuccess ? (
+          <SuccessfulTransaction
+            content={`You withdrew ${amount} ${token.name}`}
+            onCloseClick={() => setIsDialogOpen((previousState) => !previousState)}
+          />
+        ) : (
+          <>
+            <AmountInput id='withdraw-assets' token={token} amount={amount} setAmount={setAmount} />
+
+            {withdrawTransactionState.isError && <ErrorBanner>{errorMessage}</ErrorBanner>}
+
+            <LoadingButton
+              isLoading={withdrawTransactionState.isLoading}
+              loadingContent={`Withdrawing ${token.name}`}
+              defaultContent={isInputValid ? `Withdraw ${token.name}` : 'Enter an amount'}
+              disabled={!isInputValid || withdrawTransactionState.isLoading}
+              onClick={() => onWithdrawClick(token.name, amount)}
+            />
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
