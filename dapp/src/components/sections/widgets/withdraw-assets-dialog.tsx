@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { IToken } from '@/interfaces/token';
+import type {
+  IApproveTransactionAction,
+  TApproveTransactionState
+} from '@/reducers/approve-transaction';
 
+import ErrorBanner from '@/components/error-banner';
+import LoadingButton from '@/components/loading-button';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,58 +16,79 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
+import EReducerState from '@/constants/reducer-state';
 
 import AmountInput from './amount-input';
 
-interface IWithdrawAssetsDialog {
-  id: string;
+interface IWithdrawAssetsSection {
   token: IToken;
-  isSupply: boolean;
+  approveTransactionState: TApproveTransactionState;
+  onApproveClick(contractName: string, amount: string): Promise<void>;
+  onWithdrawClick: () => void;
+  dispatchApproveTransaction: React.Dispatch<IApproveTransactionAction>;
 }
 
-export default function WithdrawAssetsDialog({ id, token, isSupply }: IWithdrawAssetsDialog) {
+export default function WithdrawAssetsSection({
+  token,
+  approveTransactionState,
+  onApproveClick,
+  onWithdrawClick,
+  dispatchApproveTransaction
+}: IWithdrawAssetsSection) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
   const isInputValid = amount !== '' && amount !== '0';
 
+  const errorMessage = approveTransactionState.errorCode
+    ? approveTransactionState.errorCode === 4001
+      ? 'You cancelled the transaction.'
+      : 'Error with your transaction.'
+    : 'Error with your transaction.';
+
+  useEffect(() => {
+    if (!isDialogOpen) {
+      dispatchApproveTransaction({
+        state: EReducerState.reset,
+        payload: undefined
+      });
+    }
+  }, [isDialogOpen, dispatchApproveTransaction]);
+
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant={isSupply ? 'default' : 'secondary'} className='w-20'>
-          {isSupply ? <span>Supply</span> : <span>Withdraw</span>}
+        <Button variant='secondary' className='w-20'>
+          Withdraw
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
-          <DialogTitle>
-            {isSupply ? <span>Supply {token.name}</span> : <span>Withdraw {token.name}</span>}
-          </DialogTitle>
+          <DialogTitle>Withdraw {token.name}</DialogTitle>
         </DialogHeader>
         <div className='flex items-center space-x-2'>
-          <AmountInput id={id} token={token} amount={amount} setAmount={setAmount} />
+          <AmountInput id='withdraw-assets' token={token} amount={amount} setAmount={setAmount} />
         </div>
+
+        {approveTransactionState.isError && <ErrorBanner>{errorMessage}</ErrorBanner>}
 
         <div className='flex w-full flex-col gap-y-2.5'>
           {isInputValid && (
-            <Button variant='secondary' disabled={!isInputValid}>
-              {isSupply ? (
-                <span>Approve {token.name} to continue</span>
-              ) : (
-                <span>Approve to continue</span>
-              )}
-            </Button>
+            <LoadingButton
+              variant='secondary'
+              isLoading={approveTransactionState.isLoading}
+              loadingContent='Approving'
+              defaultContent='Approve to continue'
+              disabled={!isInputValid || approveTransactionState.isLoading}
+              onClick={() => onApproveClick(token.name, amount)}
+            />
           )}
 
-          <Button disabled={!isInputValid}>
-            {isInputValid ? (
-              isSupply ? (
-                <span>Supply {token.name}</span>
-              ) : (
-                <span>Withdraw {token.name} </span>
-              )
-            ) : (
-              <span>Enter an amount</span>
-            )}
+          <Button
+            disabled={!isInputValid || !approveTransactionState.isSuccess}
+            onClick={onWithdrawClick}
+          >
+            {isInputValid ? <span>Withdraw {token.name}</span> : <span>Enter an amount</span>}
           </Button>
         </div>
       </DialogContent>
