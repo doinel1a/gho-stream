@@ -10,6 +10,7 @@ import { Broker, LockupLinear } from "@sablier/types/DataTypes.sol";
 import { ud60x18 } from "@prb/math/src/UD60x18.sol";
 
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
+import { MockAToken } from "./mocks/MockAToken.sol";
 
 /**
  * @dev Excessively simplified version of the Aave Pool contract.
@@ -18,7 +19,7 @@ contract AaveMiniMarket {
     using EnumerableSet for EnumerableSet.UintSet;
 
     // Sepolia Addresses
-    IGhoToken public immutable GHO = IGhoToken(0xc4bF5CbDaBE595361438F8c6a187bDc330539c60);
+    IGhoToken public immutable GHO = IGhoToken(0x78aB1A9C913107D0f989f7802c5981123Fb9ba4F);
     ISablierV2LockupLinear public immutable SABLIER_LOCKUP_LINEAR =
         ISablierV2LockupLinear(0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301);
 
@@ -37,7 +38,7 @@ contract AaveMiniMarket {
     }
 
     function deposit(IERC20 token, uint256 amount) external {
-        aTokenOf[token].mint(msg.sender, msg.sender, amount, 0);
+        MockAToken(address(aTokenOf[token])).mint(msg.sender, msg.sender, amount, 0);
         token.transferFrom(msg.sender, address(this), amount);
     }
 

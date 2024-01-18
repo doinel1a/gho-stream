@@ -25,7 +25,7 @@ contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceT
     using SafeERC20 for IERC20;
 
     // Sepolia Addresses
-    IGhoToken public immutable GHO = IGhoToken(0xc4bF5CbDaBE595361438F8c6a187bDc330539c60);
+    IGhoToken public immutable GHO = IGhoToken(0x78aB1A9C913107D0f989f7802c5981123Fb9ba4F);
     ISablierV2LockupLinear public immutable SABLIER_LOCKUP_LINEAR =
         ISablierV2LockupLinear(0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301);
 

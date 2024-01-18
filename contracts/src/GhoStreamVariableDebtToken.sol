@@ -14,7 +14,7 @@ import { IGhoToken } from "./interfaces/IGhoToken.sol";
 contract GhoStreamVariableDebtToken is ScaledBalanceTokenBase, DebtTokenBase, IVariableDebtToken {
     using WadRayMath for uint256;
 
-    IGhoToken public immutable GHO = IGhoToken(0xc4bF5CbDaBE595361438F8c6a187bDc330539c60);
+    IGhoToken public immutable GHO = IGhoToken(0x78aB1A9C913107D0f989f7802c5981123Fb9ba4F);
     address internal _ghoAToken;
 
     modifier onlyAToken() {
