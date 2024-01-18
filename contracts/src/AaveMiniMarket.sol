@@ -3,19 +3,17 @@ pragma solidity 0.8.23;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IAToken } from "@aave/core-v3/contracts/interfaces/IAToken.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 import { ISablierV2LockupLinear } from "@sablier/interfaces/ISablierV2LockupLinear.sol";
 import { Broker, LockupLinear } from "@sablier/types/DataTypes.sol";
 import { ud60x18 } from "@prb/math/src/UD60x18.sol";
 
+import { IGhoFacilitator } from "./interfaces/IGhoFacilitator.sol";
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
 import { MockAToken } from "./mocks/MockAToken.sol";
 
-/**
- * @dev Excessively simplified version of the Aave Pool contract.
- */
-contract AaveMiniMarket {
+contract AaveMiniMarket is IGhoFacilitator, Ownable {
     using EnumerableSet for EnumerableSet.UintSet;
 
     // Sepolia Addresses
@@ -23,14 +21,18 @@ contract AaveMiniMarket {
     ISablierV2LockupLinear public immutable SABLIER_LOCKUP_LINEAR =
         ISablierV2LockupLinear(0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301);
 
+    address internal _ghoTreasury;
+
     mapping(IERC20 token => address aToken) public aTokenOf;
 
     // Streaming
     mapping(address borrower => EnumerableSet.UintSet streamIds) private _borrowerStreamIds;
     mapping(uint256 streamId => address borrower) private _borrowerOfStreamId;
 
-    constructor(IERC20[] memory tokens, address[] memory aTokens) {
+    constructor(IERC20[] memory tokens, address[] memory aTokens) Ownable(msg.sender) {
         require(tokens.length == aTokens.length, "Length mismatch");
+
+        _ghoTreasury = msg.sender;
 
         for (uint256 i = 0; i < tokens.length; i++) {
             aTokenOf[tokens[i]] = aTokens[i];
@@ -78,6 +80,25 @@ contract AaveMiniMarket {
 
     function getBorrowerStreamIds(address borrower) external view returns (uint256[] memory streamIds) {
         streamIds = _borrowerStreamIds[borrower].values();
+    }
+
+    function distributeFeesToTreasury() external virtual {
+        uint256 balance = GHO.balanceOf(address(this));
+        GHO.transfer(_ghoTreasury, balance);
+        emit FeesDistributedToTreasury(_ghoTreasury, address(GHO), balance);
+    }
+
+    /// @inheritdoc IGhoFacilitator
+    function updateGhoTreasury(address newGhoTreasury) external onlyOwner {
+        require(newGhoTreasury != address(0), "ZERO_ADDRESS_NOT_VALID");
+        address oldGhoTreasury = _ghoTreasury;
+        _ghoTreasury = newGhoTreasury;
+        emit GhoTreasuryUpdated(oldGhoTreasury, newGhoTreasury);
+    }
+
+    /// @inheritdoc IGhoFacilitator
+    function getGhoTreasury() external view returns (address) {
+        return _ghoTreasury;
     }
 
     function _createGhoStream(

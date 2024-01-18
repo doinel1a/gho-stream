@@ -56,6 +56,6 @@ contract BaseTest is Test {
     }
 
     function test_streamBorrow() public {
-        uint256 streamId = aaveMiniMarket.borrowGhoThroughStream(100e18, 1 days, deployer);
+        aaveMiniMarket.borrowGhoThroughStream(100e18, 1 days, deployer);
     }
 }
