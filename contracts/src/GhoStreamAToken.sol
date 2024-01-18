@@ -17,8 +17,8 @@ import { IAaveIncentivesController } from "@aave/core-v3/contracts/interfaces/IA
 import { EIP712Base } from "@aave/core-v3/contracts/protocol/tokenization/base/EIP712Base.sol";
 
 import { GhoStreamVariableDebtToken } from "./GhoStreamVariableDebtToken.sol";
-import { IGhoToken } from "./IGhoToken.sol";
-import { IGhoFacilitator } from "./IGhoFacilitator.sol";
+import { IGhoToken } from "./interfaces/IGhoToken.sol";
+import { IGhoFacilitator } from "./interfaces/IGhoFacilitator.sol";
 
 contract GhoStreamAToken is IAToken, IGhoFacilitator, EIP712Base, ScaledBalanceTokenBase {
     using EnumerableSet for EnumerableSet.UintSet;
