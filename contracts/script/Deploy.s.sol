@@ -16,7 +16,7 @@ contract DeployScript is Script {
     IERC20 public USDC = IERC20(0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8);
 
     IERC20[] public tokens;
-    IAToken[] public aTokens;
+    address[] public aTokens;
 
     function setUp() public {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
@@ -26,9 +26,9 @@ contract DeployScript is Script {
         tokens.push(DAI);
         tokens.push(USDC);
 
-        aTokens.push(IAToken(0xaC775C0b34c50Ba68bBC0e4F3c9aCCaf34123eda));
-        aTokens.push(IAToken(0x72CB9080841acB75E5AB9d83E5F78a3d20326e6A));
-        aTokens.push(IAToken(0x915790Fe8cc10Acf844CB77F8DC3299d4E3be78a));
+        aTokens.push(0xaC775C0b34c50Ba68bBC0e4F3c9aCCaf34123eda);
+        aTokens.push(0x72CB9080841acB75E5AB9d83E5F78a3d20326e6A);
+        aTokens.push(0x915790Fe8cc10Acf844CB77F8DC3299d4E3be78a);
     }
 
     function run() public {
