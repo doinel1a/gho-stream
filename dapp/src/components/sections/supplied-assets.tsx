@@ -1,24 +1,20 @@
-import React, { Suspense, useEffect, useMemo, useReducer } from 'react';
+import React, { Suspense, useReducer } from 'react';
 
-import type { IToken } from '@/interfaces/token';
+import type { TSuppliedTransactionState } from '@/reducers/supplied-transaction';
 import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
-import { ethers, formatUnits, parseUnits } from 'ethers';
+import { ethers, parseUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
 import aaveContractDetails from '@/config/aave-contract-details';
 import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
-import { cn, roundDecimal } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   approveTransactionInitialState,
   approveTransactionReducer
 } from '@/reducers/approve-transaction';
-import {
-  suppliedTransactionInitialState,
-  suppliedTransactionReducer
-} from '@/reducers/supplied-transaction';
 import {
   supplyTransactionInitialState,
   supplyTransactionReducer
@@ -40,21 +36,20 @@ const tableHeaders = ['Assets', 'Balance', ''];
 
 interface ISuppliedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
+  suppliedTransactionState: TSuppliedTransactionState;
   defaultExpanded?: boolean;
+  onCloseClick: () => void;
 }
 
 export default function SuppliedAssetsSection({
   ethersProvider,
-  className,
+  suppliedTransactionState,
   defaultExpanded,
+  onCloseClick,
+  className,
   ...properties
 }: ISuppliedAssetsSection) {
   const { address } = useAccount();
-
-  const [suppliedTransactionState, dispatchSuppliedTransaction] = useReducer(
-    suppliedTransactionReducer,
-    suppliedTransactionInitialState
-  );
 
   const [approveTransactionState, dispatchApproveTransaction] = useReducer(
     approveTransactionReducer,
@@ -70,61 +65,6 @@ export default function SuppliedAssetsSection({
     withdrawTransactionReducer,
     withdrawTransactionInitialState
   );
-
-  const memorizedGetSuppliedAssets = useMemo(() => {
-    return async function getSuppliedAssets() {
-      dispatchSuppliedTransaction({
-        state: EReducerState.start,
-        payload: undefined
-      });
-
-      const suppliedAssets: IToken[] = [];
-
-      for (const contractDetails of tokensContractDetails) {
-        const tokenContract = new ethers.Contract(
-          contractDetails.aAddress,
-          contractDetails.abi,
-          ethersProvider
-        );
-
-        const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
-        console.log(
-          `weiTokenBalance | ${contractDetails.name}`,
-          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
-        );
-
-        if (weiTokenBalance !== 0n) {
-          suppliedAssets.push({
-            name: contractDetails.name,
-            icon: contractDetails.icon,
-            weiBalance: weiTokenBalance,
-            normalizedBalance: roundDecimal(
-              Number(formatUnits(weiTokenBalance, contractDetails.decimals)),
-              2
-            )
-          });
-        }
-      }
-
-      console.log('suppliedAssets', suppliedAssets);
-
-      dispatchSuppliedTransaction({
-        state: EReducerState.success,
-        payload: suppliedAssets
-      });
-    };
-  }, [ethersProvider, address]);
-
-  useEffect(() => {
-    memorizedGetSuppliedAssets().catch((error: unknown) => {
-      dispatchSuppliedTransaction({
-        state: EReducerState.error,
-        payload: undefined
-      });
-
-      console.error('Error fetching token balance', error);
-    });
-  }, [memorizedGetSuppliedAssets]);
 
   async function onApproveClick(contractName: string, amount: string) {
     dispatchApproveTransaction({
@@ -357,7 +297,7 @@ export default function SuppliedAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
-                      onCloseClick={memorizedGetSuppliedAssets}
+                      onCloseClick={onCloseClick}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
@@ -368,7 +308,7 @@ export default function SuppliedAssetsSection({
                       token={token}
                       withdrawTransactionState={withdrawTransactionState}
                       onWithdrawClick={onWithdrawClick}
-                      onCloseClick={memorizedGetSuppliedAssets}
+                      onCloseClick={onCloseClick}
                       dispatchWithdrawTransaction={dispatchWithdrawTransaction}
                     />
                   </Suspense>

@@ -1,11 +1,10 @@
-import React, { Suspense, useEffect, useMemo, useReducer } from 'react';
+import React, { Suspense, useReducer } from 'react';
 
-import type { IToken } from '@/interfaces/token';
+import type { TWalletAssetsState } from '@/reducers/wallet-assets';
 import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
-import { ethers, formatUnits, parseUnits } from 'ethers';
-import { useAccount } from 'wagmi';
+import { ethers, parseUnits } from 'ethers';
 
 import ExternalAnchor from '@/components/external-anchor';
 import InfoBanner from '@/components/info-banner';
@@ -21,7 +20,7 @@ import {
 import aaveContractDetails from '@/config/aave-contract-details';
 import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
-import { cn, roundDecimal } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   approveTransactionInitialState,
   approveTransactionReducer
@@ -30,7 +29,6 @@ import {
   supplyTransactionInitialState,
   supplyTransactionReducer
 } from '@/reducers/supply-transaction';
-import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
 
 import ExpandableSecion from '../expandable-section';
 import Img from '../img';
@@ -42,22 +40,19 @@ const tableHeaders = ['Assets', 'Wallet balance', ''];
 
 interface ISupplyAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
+  walletAssetsState: TWalletAssetsState;
   defaultExpanded?: boolean;
+  onCloseClick: () => void;
 }
 
 export default function SupplyAssetsSection({
   ethersProvider,
-  className,
+  walletAssetsState,
   defaultExpanded,
+  onCloseClick,
+  className,
   ...properties
 }: ISupplyAssetsSection) {
-  const { address } = useAccount();
-
-  const [walletAssetsState, dispatchWalletAssets] = useReducer(
-    walletAssetsReducer,
-    walletAssetsInitialState
-  );
-
   const [approveTransactionState, dispatchApproveTransaction] = useReducer(
     approveTransactionReducer,
     approveTransactionInitialState
@@ -67,60 +62,6 @@ export default function SupplyAssetsSection({
     supplyTransactionReducer,
     supplyTransactionInitialState
   );
-
-  const memoizedGetWalletAssets = useMemo(() => {
-    return async function getWalletAssets() {
-      dispatchWalletAssets({
-        state: EReducerState.start,
-        payload: undefined
-      });
-
-      const walletAssets: IToken[] = [];
-
-      for (const contractDetails of tokensContractDetails) {
-        const tokenContract = new ethers.Contract(
-          contractDetails.address,
-          contractDetails.abi,
-          ethersProvider
-        );
-        const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
-        console.log(
-          `weiTokenBalance | ${contractDetails.name}`,
-          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
-        );
-
-        if (weiTokenBalance !== 0n) {
-          walletAssets.push({
-            name: contractDetails.name,
-            icon: contractDetails.icon,
-            weiBalance: weiTokenBalance,
-            normalizedBalance: roundDecimal(
-              Number(formatUnits(weiTokenBalance, contractDetails.decimals)),
-              2
-            )
-          });
-        }
-      }
-
-      console.log('walletAssets', walletAssets);
-
-      dispatchWalletAssets({
-        state: EReducerState.success,
-        payload: walletAssets
-      });
-    };
-  }, [ethersProvider, address]);
-
-  useEffect(() => {
-    memoizedGetWalletAssets().catch((error: unknown) => {
-      dispatchWalletAssets({
-        state: EReducerState.error,
-        payload: undefined
-      });
-
-      console.error('Error fetching token balance', error);
-    });
-  }, [memoizedGetWalletAssets]);
 
   async function onApproveClick(tokenName: string, amount: string) {
     dispatchApproveTransaction({
@@ -304,7 +245,7 @@ export default function SupplyAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
-                      onCloseClick={memoizedGetWalletAssets}
+                      onCloseClick={onCloseClick}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
