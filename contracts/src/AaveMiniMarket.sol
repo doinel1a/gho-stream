@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -14,8 +13,6 @@ import { IGhoToken } from "./interfaces/IGhoToken.sol";
 import { MockAToken } from "./mocks/MockAToken.sol";
 
 contract AaveMiniMarket is IGhoFacilitator, Ownable {
-    using EnumerableSet for EnumerableSet.UintSet;
-
     // Sepolia Addresses
     IGhoToken public immutable GHO = IGhoToken(0x78aB1A9C913107D0f989f7802c5981123Fb9ba4F);
     ISablierV2LockupLinear public immutable SABLIER_LOCKUP_LINEAR =
@@ -26,7 +23,7 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
     mapping(IERC20 token => address aToken) public aTokenOf;
 
     // Streaming
-    mapping(address borrower => EnumerableSet.UintSet streamIds) private _borrowerStreamIds;
+    mapping(address borrower => uint256[] streamIds) private _borrowerStreamIds;
     mapping(uint256 streamId => address borrower) private _borrowerOfStreamId;
 
     constructor(IERC20[] memory tokens, address[] memory aTokens) Ownable(msg.sender) {
@@ -59,7 +56,7 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
     {
         uint256 nextStreamId = SABLIER_LOCKUP_LINEAR.nextStreamId();
 
-        _borrowerStreamIds[msg.sender].add(nextStreamId);
+        _borrowerStreamIds[msg.sender].push(nextStreamId);
         _borrowerOfStreamId[nextStreamId] = msg.sender;
 
         GHO.mint(address(this), amount);
@@ -79,7 +76,7 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
     }
 
     function getBorrowerStreamIds(address borrower) external view returns (uint256[] memory streamIds) {
-        streamIds = _borrowerStreamIds[borrower].values();
+        streamIds = _borrowerStreamIds[borrower];
     }
 
     function distributeFeesToTreasury() external virtual {
@@ -88,7 +85,6 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
         emit FeesDistributedToTreasury(_ghoTreasury, address(GHO), balance);
     }
 
-    /// @inheritdoc IGhoFacilitator
     function updateGhoTreasury(address newGhoTreasury) external onlyOwner {
         require(newGhoTreasury != address(0), "ZERO_ADDRESS_NOT_VALID");
         address oldGhoTreasury = _ghoTreasury;
@@ -96,7 +92,6 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
         emit GhoTreasuryUpdated(oldGhoTreasury, newGhoTreasury);
     }
 
-    /// @inheritdoc IGhoFacilitator
     function getGhoTreasury() external view returns (address) {
         return _ghoTreasury;
     }
@@ -118,7 +113,7 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
             cancelable: true,
             transferable: true,
             durations: LockupLinear.Durations({ cliff: 0, total: duration }),
-            broker: Broker(address(0), ud60x18(0)) // TODO: send funds to gho treasury
+            broker: Broker(_ghoTreasury, ud60x18(0.01e18)) // 1% fee
          });
 
         streamId = SABLIER_LOCKUP_LINEAR.createWithDurations(params);
