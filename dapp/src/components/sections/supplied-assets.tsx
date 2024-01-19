@@ -1,11 +1,10 @@
 import React, { Suspense, useReducer } from 'react';
 
-import type { IToken } from '@/interfaces/token';
+import type { TSuppliedTransactionState } from '@/reducers/supplied-transaction';
 import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
 import { ethers, parseUnits } from 'ethers';
-import { useAccount } from 'wagmi';
 
 import aaveContractDetails from '@/config/aave-contract-details';
 import tokensContractDetails from '@/config/tokens-contract-details';
@@ -36,29 +35,19 @@ const tableHeaders = ['Assets', 'Balance', ''];
 
 interface ISuppliedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
+  suppliedTransactionState: TSuppliedTransactionState;
   defaultExpanded?: boolean;
+  onCloseClick: () => void;
 }
 
 export default function SuppliedAssetsSection({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ethersProvider,
-  className,
+  suppliedTransactionState,
   defaultExpanded,
+  onCloseClick,
+  className,
   ...properties
 }: ISuppliedAssetsSection) {
-  const suppliedAssets: IToken[] = [
-    {
-      name: 'DAI',
-      icon: 'https://staging.aave.com/icons/tokens/dai.svg',
-      normalizedBalance: 10_000,
-      weiBalance: 9_999_998_803_039_848_520_301n
-    }
-  ];
-  const isLoading = false;
-  const isSuccess = true;
-
-  const { address } = useAccount();
-
   const [approveTransactionState, dispatchApproveTransaction] = useReducer(
     approveTransactionReducer,
     approveTransactionInitialState
@@ -94,7 +83,7 @@ export default function SuppliedAssetsSection({
 
       try {
         const transactionResponse: TransactionResponse = (await tokenContract.approve(
-          address,
+          aaveContractDetails.address,
           parseUnits(amount, contractDetails.decimals)
         )) as TransactionResponse;
 
@@ -262,9 +251,9 @@ export default function SuppliedAssetsSection({
       defaultExpanded={defaultExpanded}
       {...properties}
     >
-      {isLoading ? (
+      {suppliedTransactionState.isLoading ? (
         <Skeleton className='h-[17rem] w-full' />
-      ) : isSuccess && suppliedAssets?.length === 0 ? (
+      ) : suppliedTransactionState.isSuccess && suppliedTransactionState.tokens?.length === 0 ? (
         <div className=''>
           <p className='text-muted-foreground'>Nothing supplied yet</p>
         </div>
@@ -280,7 +269,7 @@ export default function SuppliedAssetsSection({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {suppliedAssets.map((token, index) => (
+            {suppliedTransactionState.tokens?.map((token, index) => (
               <TableRow key={`${token.name}-${index}`}>
                 <TableCell>
                   <div className='flex items-center gap-x-2.5'>
@@ -305,9 +294,7 @@ export default function SuppliedAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
-                      onCloseClick={() => {
-                        console.log('CLOSE WITHDRAW');
-                      }}
+                      onCloseClick={onCloseClick}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
@@ -318,6 +305,7 @@ export default function SuppliedAssetsSection({
                       token={token}
                       withdrawTransactionState={withdrawTransactionState}
                       onWithdrawClick={onWithdrawClick}
+                      onCloseClick={onCloseClick}
                       dispatchWithdrawTransaction={dispatchWithdrawTransaction}
                     />
                   </Suspense>

@@ -13,10 +13,17 @@ interface IAmountInput {
   id: string;
   token: IToken;
   amount: string;
+  isClearButtonDisabled: boolean;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 }
 
-export default function AmountInput({ id, token, amount, setAmount }: IAmountInput) {
+export default function AmountInput({
+  id,
+  token,
+  amount,
+  isClearButtonDisabled,
+  setAmount
+}: IAmountInput) {
   return (
     <div className='grid flex-1 gap-2'>
       <Label htmlFor={id} className='text-base'>
@@ -39,6 +46,7 @@ export default function AmountInput({ id, token, amount, setAmount }: IAmountInp
                 size='icon'
                 variant='outline'
                 className='mr-2.5 h-4 w-4 rounded-full bg-muted'
+                disabled={isClearButtonDisabled}
                 onClick={() => setAmount('')}
               >
                 <X className='h-2.5 w-2.5 text-muted-foreground' />

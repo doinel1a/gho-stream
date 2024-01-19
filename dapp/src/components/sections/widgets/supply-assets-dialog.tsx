@@ -97,7 +97,15 @@ export default function SupplyAssetsDialog({
           />
         ) : (
           <>
-            <AmountInput id='supply-assets' token={token} amount={amount} setAmount={setAmount} />
+            <AmountInput
+              id='supply-assets'
+              token={token}
+              amount={amount}
+              isClearButtonDisabled={
+                approveTransactionState.isLoading || supplyTransactionState.isLoading
+              }
+              setAmount={setAmount}
+            />
 
             {(approveTransactionState.isError || supplyTransactionState.isError) && (
               <ErrorBanner>{errorMessage}</ErrorBanner>

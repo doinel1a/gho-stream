@@ -1,19 +1,38 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useReducer, useState } from 'react';
 
+import type { IToken } from '@/interfaces/token';
 import type { Eip1193Provider } from 'ethers';
 
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, ethers, formatUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import tokensContractDetails from '@/config/tokens-contract-details';
+import EReducerState from '@/constants/reducer-state';
+import { roundDecimal } from '@/lib/utils';
+import {
+  suppliedTransactionInitialState,
+  suppliedTransactionReducer
+} from '@/reducers/supplied-transaction';
+import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
 
 const SupplyAssetsSection = React.lazy(() => import('@/components/sections/supply-assets'));
 const SuppliedAssetsSection = React.lazy(() => import('@/components/sections/supplied-assets'));
 
 export default function HomePage() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
 
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | undefined>(undefined);
+
+  const [walletAssetsState, dispatchWalletAssets] = useReducer(
+    walletAssetsReducer,
+    walletAssetsInitialState
+  );
+
+  const [suppliedTransactionState, dispatchSuppliedTransaction] = useReducer(
+    suppliedTransactionReducer,
+    suppliedTransactionInitialState
+  );
 
   useEffect(() => {
     if (window.ethereum) {
@@ -21,6 +40,135 @@ export default function HomePage() {
       setEthersProvider(provider);
     }
   }, []);
+
+  const memoizedGetWalletAssets = useMemo(() => {
+    return async function getWalletAssets() {
+      dispatchWalletAssets({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const walletAssets: IToken[] = [];
+
+      for (const contractDetails of tokensContractDetails) {
+        const tokenContract = new ethers.Contract(
+          contractDetails.address,
+          contractDetails.abi,
+          ethersProvider
+        );
+        const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
+        console.log(
+          `weiTokenBalance | ${contractDetails.name}`,
+          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
+        );
+
+        if (weiTokenBalance !== 0n) {
+          walletAssets.push({
+            name: contractDetails.name,
+            icon: contractDetails.icon,
+            weiBalance: weiTokenBalance,
+            normalizedBalance: roundDecimal(
+              Number(formatUnits(weiTokenBalance, contractDetails.decimals)),
+              2
+            )
+          });
+        }
+      }
+
+      console.log('walletAssets', walletAssets);
+
+      dispatchWalletAssets({
+        state: EReducerState.success,
+        payload: walletAssets
+      });
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    memoizedGetWalletAssets().catch((error: unknown) => {
+      dispatchWalletAssets({
+        state: EReducerState.error,
+        payload: undefined
+      });
+
+      console.error('Error fetching wallet tokens balance', error);
+    });
+  }, [memoizedGetWalletAssets]);
+
+  const memorizedGetSuppliedAssets = useMemo(() => {
+    return async function getSuppliedAssets() {
+      dispatchSuppliedTransaction({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const suppliedAssets: IToken[] = [];
+
+      for (const contractDetails of tokensContractDetails) {
+        const tokenContract = new ethers.Contract(
+          contractDetails.aAddress,
+          contractDetails.abi,
+          ethersProvider
+        );
+
+        const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
+        console.log(
+          `weiTokenBalance | ${contractDetails.name}`,
+          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
+        );
+
+        if (weiTokenBalance !== 0n) {
+          suppliedAssets.push({
+            name: contractDetails.name,
+            icon: contractDetails.icon,
+            weiBalance: weiTokenBalance,
+            normalizedBalance: roundDecimal(
+              Number(formatUnits(weiTokenBalance, contractDetails.decimals)),
+              2
+            )
+          });
+        }
+      }
+
+      console.log('suppliedAssets', suppliedAssets);
+
+      dispatchSuppliedTransaction({
+        state: EReducerState.success,
+        payload: suppliedAssets
+      });
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    memorizedGetSuppliedAssets().catch((error: unknown) => {
+      dispatchSuppliedTransaction({
+        state: EReducerState.error,
+        payload: undefined
+      });
+
+      console.error('Error fetching supplied tokens', error);
+    });
+  }, [memorizedGetSuppliedAssets]);
+
+  async function onCloseButtonClick() {
+    memoizedGetWalletAssets().catch((error: unknown) => {
+      dispatchWalletAssets({
+        state: EReducerState.error,
+        payload: undefined
+      });
+
+      console.error('Error fetching wallet tokens balance', error);
+    });
+
+    memorizedGetSuppliedAssets().catch((error: unknown) => {
+      dispatchSuppliedTransaction({
+        state: EReducerState.error,
+        payload: undefined
+      });
+
+      console.error('Error fetching supplied tokens', error);
+    });
+  }
 
   return (
     <>
@@ -30,16 +178,20 @@ export default function HomePage() {
             <Suspense fallback={<Skeleton className='h-52 w-1/2' />}>
               <SupplyAssetsSection
                 ethersProvider={ethersProvider}
+                walletAssetsState={walletAssetsState}
                 className='w-1/2'
                 defaultExpanded
+                onCloseClick={onCloseButtonClick}
               />
             </Suspense>
 
             <Suspense fallback={<Skeleton className='h-52 w-1/2' />}>
               <SuppliedAssetsSection
                 ethersProvider={ethersProvider}
+                suppliedTransactionState={suppliedTransactionState}
                 className='w-1/2'
                 defaultExpanded
+                onCloseClick={onCloseButtonClick}
               />
             </Suspense>
           </div>
