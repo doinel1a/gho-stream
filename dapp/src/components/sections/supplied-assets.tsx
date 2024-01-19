@@ -5,7 +5,6 @@ import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
 import { ethers, parseUnits } from 'ethers';
-import { useAccount } from 'wagmi';
 
 import aaveContractDetails from '@/config/aave-contract-details';
 import tokensContractDetails from '@/config/tokens-contract-details';
@@ -49,8 +48,6 @@ export default function SuppliedAssetsSection({
   className,
   ...properties
 }: ISuppliedAssetsSection) {
-  const { address } = useAccount();
-
   const [approveTransactionState, dispatchApproveTransaction] = useReducer(
     approveTransactionReducer,
     approveTransactionInitialState
@@ -86,7 +83,7 @@ export default function SuppliedAssetsSection({
 
       try {
         const transactionResponse: TransactionResponse = (await tokenContract.approve(
-          address,
+          aaveContractDetails.address,
           parseUnits(amount, contractDetails.decimals)
         )) as TransactionResponse;
 
