@@ -42,6 +42,10 @@ export default function HomePage() {
   }, []);
 
   const memoizedGetWalletAssets = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
     return async function getWalletAssets() {
       dispatchWalletAssets({
         state: EReducerState.start,
@@ -85,17 +89,23 @@ export default function HomePage() {
   }, [ethersProvider, address]);
 
   useEffect(() => {
-    memoizedGetWalletAssets().catch((error: unknown) => {
-      dispatchWalletAssets({
-        state: EReducerState.error,
-        payload: undefined
-      });
+    if (typeof memoizedGetWalletAssets === 'function') {
+      memoizedGetWalletAssets().catch((error: unknown) => {
+        dispatchWalletAssets({
+          state: EReducerState.error,
+          payload: undefined
+        });
 
-      console.error('Error fetching wallet tokens balance', error);
-    });
+        console.error('Error fetching wallet tokens balance', error);
+      });
+    }
   }, [memoizedGetWalletAssets]);
 
   const memorizedGetSuppliedAssets = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
     return async function getSuppliedAssets() {
       dispatchSuppliedTransaction({
         state: EReducerState.start,
@@ -140,34 +150,40 @@ export default function HomePage() {
   }, [ethersProvider, address]);
 
   useEffect(() => {
-    memorizedGetSuppliedAssets().catch((error: unknown) => {
-      dispatchSuppliedTransaction({
-        state: EReducerState.error,
-        payload: undefined
-      });
+    if (typeof memorizedGetSuppliedAssets === 'function') {
+      memorizedGetSuppliedAssets().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
 
-      console.error('Error fetching supplied tokens', error);
-    });
+        console.error('Error fetching supplied tokens', error);
+      });
+    }
   }, [memorizedGetSuppliedAssets]);
 
   async function onCloseButtonClick() {
-    memoizedGetWalletAssets().catch((error: unknown) => {
-      dispatchWalletAssets({
-        state: EReducerState.error,
-        payload: undefined
+    if (typeof memoizedGetWalletAssets === 'function') {
+      memoizedGetWalletAssets().catch((error: unknown) => {
+        dispatchWalletAssets({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching wallet tokens balance', error);
       });
+    }
 
-      console.error('Error fetching wallet tokens balance', error);
-    });
+    if (typeof memorizedGetSuppliedAssets === 'function') {
+      memorizedGetSuppliedAssets().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
 
-    memorizedGetSuppliedAssets().catch((error: unknown) => {
-      dispatchSuppliedTransaction({
-        state: EReducerState.error,
-        payload: undefined
+        console.error('Error fetching supplied tokens', error);
       });
-
-      console.error('Error fetching supplied tokens', error);
-    });
+    }
   }
 
   return (
