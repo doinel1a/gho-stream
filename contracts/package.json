@@ -33,6 +33,7 @@
   "scripts": {
     "clean": "rm -rf cache out",
     "build": "forge build",
+    "build:src": "forge build --skip '*/test/**' '*/script/**'",
     "lint": "pnpm run lint:sol && pnpm run prettier:check",
     "lint:sol": "forge fmt --check && pnpm solhint {script,src,test}/**/*.sol",
     "prettier:check": "prettier --check **/*.{json,md,yml} --ignore-path=.prettierignore",
