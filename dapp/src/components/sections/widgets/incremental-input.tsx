@@ -15,6 +15,7 @@ interface IIncrementalInput extends InputProps {
 
 export default function IncrementalInput({
   type,
+  disabled,
   onUpClick,
   onDownClick,
   ...properties
@@ -22,7 +23,13 @@ export default function IncrementalInput({
   return (
     <div className='relative flex w-full items-center'>
       <div className='absolute left-3 flex h-full w-full flex-col justify-between py-2'>
-        <Button size='icon' variant='secondary' className='h-3 w-6 rounded-sm' onClick={onUpClick}>
+        <Button
+          size='icon'
+          variant='secondary'
+          className='h-3 w-6 rounded-sm'
+          disabled={disabled}
+          onClick={onUpClick}
+        >
           <ChevronUp className='h-3.5 w-3.5 text-secondary-foreground' />
         </Button>
 
@@ -30,6 +37,7 @@ export default function IncrementalInput({
           size='icon'
           variant='secondary'
           className='h-3 w-6 rounded-sm'
+          disabled={disabled}
           onClick={onDownClick}
         >
           <ChevronDown className='h-3.5 w-3.5 text-secondary-foreground' />
@@ -38,7 +46,7 @@ export default function IncrementalInput({
 
       <span className='absolute right-3 text-sm text-muted-foreground'>{type}</span>
 
-      <Input className='h-12 w-full pl-12 text-lg' {...properties} />
+      <Input className='h-12 w-full pl-12 text-lg' disabled={disabled} {...properties} />
     </div>
   );
 }
