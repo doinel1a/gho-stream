@@ -301,6 +301,7 @@ export default function SupplyAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
+                      onCloseClick={memoizedGetWalletAssets}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
