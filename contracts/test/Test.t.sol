@@ -3,11 +3,11 @@ pragma solidity 0.8.23;
 
 import { Test } from "forge-std/Test.sol";
 import { ISablierV2LockupLinear } from "@sablier/interfaces/ISablierV2LockupLinear.sol";
-import { AaveMiniMarket } from "src/AaveMiniMarket.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { IAToken } from "@aave/core-v3/contracts/interfaces/IAToken.sol";
-import { console } from "forge-std/console.sol";
+
+import { AaveMiniMarket } from "src/AaveMiniMarket.sol";
 import { MockAToken } from "src/mocks/MockAToken.sol";
+import { GhoDebtToken } from "src/GhoDebtToken.sol";
 
 contract BaseTest is Test {
     address public deployer;
@@ -15,8 +15,11 @@ contract BaseTest is Test {
     IERC20 public WETH = IERC20(0xC558DBdd856501FCd9aaF1E62eae57A9F0629a3c);
     IERC20 public DAI = IERC20(0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357);
     IERC20 public USDC = IERC20(0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8);
+
     IERC20[] public tokens;
     address[] public aTokens;
+
+    GhoDebtToken public debtToken;
 
     function setUp() public {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
@@ -36,6 +39,8 @@ contract BaseTest is Test {
         deal(address(WETH), deployer, 100e18);
         deal(address(DAI), deployer, 100e18);
         deal(address(USDC), deployer, 100e6);
+
+        debtToken = new GhoDebtToken(address(aaveMiniMarket));
     }
 
     function test_aaveMiniMarket() public {
@@ -57,5 +62,10 @@ contract BaseTest is Test {
 
     function test_streamBorrow() public {
         aaveMiniMarket.borrowGhoThroughStream(100e18, 1 days, deployer);
+
+        skip(12 hours);
+
+        uint256 debtBalance = debtToken.balanceOf(deployer);
+        assert(debtBalance != 0);
     }
 }

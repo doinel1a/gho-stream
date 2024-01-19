@@ -13,6 +13,7 @@ contract GhoDebtToken is ERC20 {
 
     constructor(address aaveMarket) ERC20("GHO Debt Token", "GHO-DEBT") {
         AAVE_MARKET = AaveMiniMarket(aaveMarket);
+        SABLIER_LOCKUP_LINEAR = AAVE_MARKET.SABLIER_LOCKUP_LINEAR();
     }
 
     function balanceOf(address account) public view override returns (uint256) {
