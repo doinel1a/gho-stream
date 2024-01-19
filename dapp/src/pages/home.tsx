@@ -6,6 +6,7 @@ import type { Eip1193Provider } from 'ethers';
 import { BrowserProvider, ethers, formatUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
+import Header from '@/components/header';
 import { Skeleton } from '@/components/ui/skeleton';
 import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
@@ -189,6 +190,7 @@ export default function HomePage() {
 
   return (
     <>
+      <Header />
       {ethersProvider ? (
         isConnected ? (
           <div className='flex w-full items-start gap-5'>
