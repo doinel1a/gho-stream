@@ -16,7 +16,6 @@ interface IAmountInput extends InputProps {
   amount: string;
   maxAmount: number;
   maxAmountDescription: string;
-  areButtonsDisabled: boolean;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -27,7 +26,7 @@ export default function AmountInput({
   amount,
   maxAmount,
   maxAmountDescription,
-  areButtonsDisabled,
+  disabled,
   setAmount,
   ...properties
 }: IAmountInput) {
@@ -43,6 +42,7 @@ export default function AmountInput({
           value={amount}
           placeholder='0.00'
           className='h-16 text-xl'
+          disabled={disabled}
           onChange={(event) => setAmount(event.target.value)}
           {...properties}
         />
@@ -54,7 +54,7 @@ export default function AmountInput({
                 size='icon'
                 variant='outline'
                 className='mr-2.5 h-4 w-4 rounded-full bg-muted'
-                disabled={areButtonsDisabled}
+                disabled={disabled}
                 onClick={() => setAmount('')}
               >
                 <X className='h-2.5 w-2.5 text-muted-foreground' />
@@ -79,7 +79,7 @@ export default function AmountInput({
             <Button
               variant='ghost'
               className='h-5 px-0 py-1 text-xs'
-              disabled={amount === maxAmount.toString() || areButtonsDisabled}
+              disabled={amount === maxAmount.toString() || disabled}
               onClick={() => setAmount(maxAmount.toString())}
             >
               MAX
