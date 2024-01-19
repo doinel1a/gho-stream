@@ -12,6 +12,12 @@ import { IGhoFacilitator } from "./interfaces/IGhoFacilitator.sol";
 import { IGhoToken } from "./interfaces/IGhoToken.sol";
 import { MockAToken } from "./mocks/MockAToken.sol";
 
+struct TokenData {
+    address token;
+    address aToken;
+    uint256 price;
+}
+
 contract AaveMiniMarket is IGhoFacilitator, Ownable {
     // Sepolia Addresses
     IGhoToken public immutable GHO = IGhoToken(0x78aB1A9C913107D0f989f7802c5981123Fb9ba4F);
@@ -19,31 +25,29 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
         ISablierV2LockupLinear(0x7a43F8a888fa15e68C103E18b0439Eb1e98E4301);
 
     address internal _ghoTreasury;
-
-    mapping(IERC20 token => address aToken) public aTokenOf;
+    TokenData[] internal _tokenData;
+    mapping(address token => address aToken) internal _aTokenOf;
 
     // Streaming
     mapping(address borrower => uint256[] streamIds) private _borrowerStreamIds;
     mapping(uint256 streamId => address borrower) private _borrowerOfStreamId;
 
-    constructor(IERC20[] memory tokens, address[] memory aTokens) Ownable(msg.sender) {
-        require(tokens.length == aTokens.length, "Length mismatch");
-
+    constructor(TokenData[] memory tokenData) Ownable(msg.sender) {
         _ghoTreasury = msg.sender;
 
-        for (uint256 i = 0; i < tokens.length; i++) {
-            aTokenOf[tokens[i]] = aTokens[i];
+        for (uint256 i = 0; i < tokenData.length; i++) {
+            _aTokenOf[tokenData[i].token] = tokenData[i].aToken;
         }
     }
 
-    function deposit(IERC20 token, uint256 amount) external {
-        MockAToken(aTokenOf[token]).mint(msg.sender, msg.sender, amount, 0);
-        token.transferFrom(msg.sender, address(this), amount);
+    function deposit(address token, uint256 amount) external {
+        MockAToken(_aTokenOf[token]).mint(msg.sender, msg.sender, amount, 0);
+        IERC20(token).transferFrom(msg.sender, address(this), amount);
     }
 
-    function withdraw(IERC20 token, uint256 amount) external {
-        MockAToken(aTokenOf[token]).burn(msg.sender, msg.sender, amount, 0);
-        token.transfer(msg.sender, amount);
+    function withdraw(address token, uint256 amount) external {
+        MockAToken(_aTokenOf[token]).burn(msg.sender, msg.sender, amount, 0);
+        IERC20(token).transfer(msg.sender, amount);
     }
 
     function borrowGhoThroughStream(
