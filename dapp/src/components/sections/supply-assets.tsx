@@ -84,7 +84,10 @@ export default function SupplyAssetsSection({
           ethersProvider
         );
         const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
-        console.log('weiTokenBalance', weiTokenBalance);
+        console.log(
+          `weiTokenBalance | ${contractDetails.name}`,
+          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
+        );
 
         if (weiTokenBalance !== 0n) {
           walletAssets.push({

@@ -5,6 +5,7 @@ interface ITokenBase {
 
 interface ITokenContract extends ITokenBase {
   address: string;
+  aAddress: string;
   abi: string[];
   decimals: number;
 }
