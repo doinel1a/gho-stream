@@ -31,6 +31,7 @@ interface ISupplyAssetsDialog {
   supplyTransactionState: TSupplyTransactionState;
   onApproveClick(tokenName: string, amount: string): Promise<void>;
   onSupplyClick(tokenName: string, amount: string): Promise<void>;
+  onCloseClick: () => void;
   dispatchApproveTransaction: React.Dispatch<IApproveTransactionAction>;
   dispatchSupplyTransaction: React.Dispatch<ISupplyTransactionAction>;
 }
@@ -41,6 +42,7 @@ export default function SupplyAssetsDialog({
   supplyTransactionState,
   onApproveClick,
   onSupplyClick,
+  onCloseClick,
   dispatchApproveTransaction,
   dispatchSupplyTransaction
 }: ISupplyAssetsDialog) {
@@ -56,6 +58,7 @@ export default function SupplyAssetsDialog({
         : 'Error with your transaction.'
       : 'Error with your transaction.';
 
+  // TODO: Could be removed and handle resets on "onCloseClick"
   useEffect(() => {
     if (!isDialogOpen) {
       setAmount('');
@@ -87,7 +90,10 @@ export default function SupplyAssetsDialog({
         {supplyTransactionState.isSuccess ? (
           <SuccessfulTransaction
             content={`You supplied ${amount} ${token.name}`}
-            onCloseClick={() => setIsDialogOpen((previousState) => !previousState)}
+            onCloseClick={() => {
+              setIsDialogOpen((previousState) => !previousState);
+              onCloseClick();
+            }}
           />
         ) : (
           <>

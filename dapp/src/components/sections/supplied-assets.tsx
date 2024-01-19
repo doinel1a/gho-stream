@@ -305,6 +305,9 @@ export default function SuppliedAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
+                      onCloseClick={() => {
+                        console.log('CLOSE WITHDRAW');
+                      }}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
