@@ -41,13 +41,15 @@ interface IStreamAssetsDialog {
   streamTransactionState: TStreamTransactionState;
   dispatchStreamTransaction: React.Dispatch<IStreamTransactionAction>;
   onStreamClick(amount: string, streamDuration: string, streamRecipient: string): Promise<void>;
+  onCloseButtonClick: () => void;
 }
 
 export default function StreamAssetsDialog({
   token,
   streamTransactionState,
   dispatchStreamTransaction,
-  onStreamClick
+  onStreamClick,
+  onCloseButtonClick
 }: IStreamAssetsDialog) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -116,6 +118,7 @@ export default function StreamAssetsDialog({
             content={`You streamed ${amount} ${token.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
+              onCloseButtonClick();
             }}
           />
         ) : (

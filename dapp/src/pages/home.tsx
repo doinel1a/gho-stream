@@ -1,16 +1,24 @@
 import React, { Suspense, useEffect, useMemo, useReducer, useState } from 'react';
 
+import type IStreamedAsset from '@/interfaces/streamed-asset';
 import type { IToken } from '@/interfaces/token';
-import type { Eip1193Provider } from 'ethers';
+import type { Eip1193Provider, TransactionResponse } from 'ethers';
 
+import { format } from 'date-fns';
 import { BrowserProvider, ethers, formatUnits } from 'ethers';
 import { useAccount } from 'wagmi';
 
 import Header from '@/components/header';
 import { Skeleton } from '@/components/ui/skeleton';
+import aaveContractDetails from '@/config/aave-contract-details';
+import sablierContractDetails from '@/config/sablier-contract-details';
 import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
 import { roundDecimal } from '@/lib/utils';
+import {
+  streamedTransactionInitialState,
+  streamedTransactionReducer
+} from '@/reducers/streamed-transaction';
 import {
   suppliedTransactionInitialState,
   suppliedTransactionReducer
@@ -20,6 +28,7 @@ import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet
 const SupplyAssetsSection = React.lazy(() => import('@/components/sections/supply-assets'));
 const SuppliedAssetsSection = React.lazy(() => import('@/components/sections/supplied-assets'));
 const AssetsToStreamSection = React.lazy(() => import('@/components/sections/assets-to-stream'));
+const StreamedAssetsSection = React.lazy(() => import('@/components/sections/streamed-assets'));
 
 export default function HomePage() {
   const { isConnected, address } = useAccount();
@@ -34,6 +43,11 @@ export default function HomePage() {
   const [suppliedTransactionState, dispatchSuppliedTransaction] = useReducer(
     suppliedTransactionReducer,
     suppliedTransactionInitialState
+  );
+
+  const [streamedTransactionState, dispatchStreamedTransaction] = useReducer(
+    streamedTransactionReducer,
+    streamedTransactionInitialState
   );
 
   useEffect(() => {
@@ -63,10 +77,6 @@ export default function HomePage() {
           ethersProvider
         );
         const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
-        console.log(
-          `weiTokenBalance | ${contractDetails.name}`,
-          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
-        );
 
         if (weiTokenBalance !== 0n) {
           walletAssets.push({
@@ -124,10 +134,6 @@ export default function HomePage() {
         );
 
         const weiTokenBalance = (await tokenContract.balanceOf(address)) as bigint;
-        console.log(
-          `weiTokenBalance | ${contractDetails.name}`,
-          roundDecimal(Number(formatUnits(weiTokenBalance, contractDetails.decimals)), 2)
-        );
 
         if (weiTokenBalance !== 0n) {
           suppliedAssets.push({
@@ -164,6 +170,95 @@ export default function HomePage() {
     }
   }, [memorizedGetSuppliedAssets]);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
+  const memorizedGetStreamedAssets = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
+    return async function getStreamedAssets() {
+      dispatchStreamedTransaction({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const streamedAssets: IStreamedAsset[] = [];
+
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.artifacts.abi,
+        ethersProvider
+      );
+
+      const streamIdsResponse: TransactionResponse = (await aaveContract.getBorrowerStreamIds(
+        address
+      )) as TransactionResponse;
+      const streamIds = streamIdsResponse.valueOf() as bigint[];
+
+      for (const streamId of streamIds) {
+        const sablierContract = new ethers.Contract(
+          sablierContractDetails.address,
+          sablierContractDetails.artifacts.abi,
+          ethersProvider
+        );
+
+        const depositAmount = (await sablierContract.getDepositedAmount(streamId)) as bigint;
+        const startTime = (await sablierContract.getStartTime(streamId)) as bigint;
+        const endTime = (await sablierContract.getEndTime(streamId)) as bigint;
+        const recipient = (await sablierContract.getRecipient(streamId)) as string;
+        const status = (await sablierContract.statusOf(streamId)) as bigint;
+        const streamedAmount = (await sablierContract.streamedAmountOf(streamId)) as bigint;
+        const withdrawnAmount = (await sablierContract.getWithdrawnAmount(streamId)) as bigint;
+        const tokenUri = (await sablierContract.tokenURI(streamId)) as string;
+
+        const mappedStatus =
+          status === 0n
+            ? 'Pending'
+            : status === 1n
+              ? 'Streaming'
+              : status === 2n
+                ? 'Settled'
+                : status === 3n
+                  ? 'Cancelled'
+                  : 'Depleted';
+
+        streamedAssets.push({
+          id: streamId,
+          // eslint-disable-next-line quotes
+          startTime: format(new Date(Number(startTime) * 1000), "MMM d ''yy @ h:mm a"),
+          // eslint-disable-next-line quotes
+          endTime: format(new Date(Number(endTime) * 1000), "MMM d ''yy @ h:mm a"),
+          recipient,
+          status: mappedStatus,
+          depositAmount: roundDecimal(Number(formatUnits(depositAmount, 18)), 2),
+          streamedAmount: roundDecimal(Number(formatUnits(streamedAmount, 18)), 2),
+          withdrawnAmount: roundDecimal(Number(formatUnits(withdrawnAmount, 18)), 2),
+          tokenUri
+        });
+      }
+
+      console.log('streamedAssets', streamedAssets);
+
+      dispatchStreamedTransaction({
+        state: EReducerState.success,
+        payload: streamedAssets
+      });
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    if (typeof memorizedGetStreamedAssets === 'function') {
+      memorizedGetStreamedAssets().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching streamed assets', error);
+      });
+    }
+  }, [memorizedGetStreamedAssets]);
+
   async function onCloseButtonClick() {
     if (typeof memoizedGetWalletAssets === 'function') {
       memoizedGetWalletAssets().catch((error: unknown) => {
@@ -188,9 +283,23 @@ export default function HomePage() {
     }
   }
 
+  async function onStreamDialogCloseButtonClick() {
+    if (typeof memorizedGetStreamedAssets === 'function') {
+      memorizedGetStreamedAssets().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching streamed assets', error);
+      });
+    }
+  }
+
   return (
     <>
       <Header />
+
       {ethersProvider ? (
         isConnected ? (
           <div className='flex w-full items-start gap-5'>
@@ -218,10 +327,19 @@ export default function HomePage() {
 
             <div className='flex w-1/2 flex-col gap-5'>
               <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                <StreamedAssetsSection
+                  streamedTransactionState={streamedTransactionState}
+                  className='w-full'
+                  defaultExpanded
+                />
+              </Suspense>
+
+              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
                 <AssetsToStreamSection
                   ethersProvider={ethersProvider}
                   className='w-full'
                   defaultExpanded
+                  onStreamDialogCloseButtonClick={onStreamDialogCloseButtonClick}
                 />
               </Suspense>
             </div>
