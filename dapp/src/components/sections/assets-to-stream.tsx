@@ -39,12 +39,14 @@ const assetsToStream: TAssetToStream[] = [
 interface IAssetsToStreamSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   defaultExpanded?: boolean;
+  onStreamDialogCloseButtonClick: () => void;
 }
 
 export default function AssetsToStreamSection({
   ethersProvider,
   defaultExpanded,
   className,
+  onStreamDialogCloseButtonClick,
   ...properties
 }: IAssetsToStreamSection) {
   const [streamTransactionState, dispatchStreamTransaction] = useReducer(
@@ -149,6 +151,7 @@ export default function AssetsToStreamSection({
                     streamTransactionState={streamTransactionState}
                     dispatchStreamTransaction={dispatchStreamTransaction}
                     onStreamClick={onStreamClick}
+                    onCloseButtonClick={onStreamDialogCloseButtonClick}
                   />
                 </Suspense>
               </TableCell>

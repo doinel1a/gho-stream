@@ -283,6 +283,19 @@ export default function HomePage() {
     }
   }
 
+  async function onStreamDialogCloseButtonClick() {
+    if (typeof memorizedGetStreamedAssets === 'function') {
+      memorizedGetStreamedAssets().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching streamed assets', error);
+      });
+    }
+  }
+
   return (
     <>
       <Header />
@@ -326,6 +339,7 @@ export default function HomePage() {
                   ethersProvider={ethersProvider}
                   className='w-full'
                   defaultExpanded
+                  onStreamDialogCloseButtonClick={onStreamDialogCloseButtonClick}
                 />
               </Suspense>
             </div>
