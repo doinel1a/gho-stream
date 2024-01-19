@@ -1,5 +1,8 @@
 import React from 'react';
 
+// eslint-disable-next-line unicorn/prevent-abbreviations
+import type { InputProps } from '../../ui/input';
+
 import { X } from 'lucide-react';
 
 import Img from '../../img';
@@ -7,8 +10,7 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 
-interface IAmountInput {
-  id: string;
+interface IAmountInput extends InputProps {
   tokenName: string;
   tokenIcon: string;
   amount: string;
@@ -26,7 +28,8 @@ export default function AmountInput({
   maxAmount,
   maxAmountDescription,
   areButtonsDisabled,
-  setAmount
+  setAmount,
+  ...properties
 }: IAmountInput) {
   return (
     <div className='grid flex-1 gap-2'>
@@ -41,6 +44,7 @@ export default function AmountInput({
           placeholder='0.00'
           className='h-16 text-xl'
           onChange={(event) => setAmount(event.target.value)}
+          {...properties}
         />
 
         <div className='absolute right-3 flex flex-col gap-y-1 bg-background'>
