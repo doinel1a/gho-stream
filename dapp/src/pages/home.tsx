@@ -18,6 +18,7 @@ import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet
 
 const SupplyAssetsSection = React.lazy(() => import('@/components/sections/supply-assets'));
 const SuppliedAssetsSection = React.lazy(() => import('@/components/sections/supplied-assets'));
+const AssetsToStreamSection = React.lazy(() => import('@/components/sections/assets-to-stream'));
 
 export default function HomePage() {
   const { isConnected, address } = useAccount();
@@ -209,6 +210,16 @@ export default function HomePage() {
                   className='w-full'
                   defaultExpanded
                   onCloseClick={onCloseButtonClick}
+                />
+              </Suspense>
+            </div>
+
+            <div className='flex w-1/2 flex-col gap-5'>
+              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                <AssetsToStreamSection
+                  ethersProvider={ethersProvider}
+                  className='w-full'
+                  defaultExpanded
                 />
               </Suspense>
             </div>
