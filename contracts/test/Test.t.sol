@@ -3,7 +3,9 @@ pragma solidity 0.8.23;
 
 import { Test } from "forge-std/Test.sol";
 import { ISablierV2LockupLinear } from "@sablier/interfaces/ISablierV2LockupLinear.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20, IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+import { console } from "forge-std/console.sol";
 
 import { AaveMiniMarket, TokenData } from "src/AaveMiniMarket.sol";
 import { MockAToken } from "src/mocks/MockAToken.sol";
@@ -35,7 +37,7 @@ contract BaseTest is Test {
 
         deal(address(WETH), deployer, 100e18);
         deal(address(DAI), deployer, 100e18);
-        deal(address(USDC), deployer, 100e6);
+        deal(address(USDC), deployer, 100e18);
     }
 
     function test_aaveMiniMarket() public {
@@ -61,6 +63,22 @@ contract BaseTest is Test {
         skip(12 hours);
 
         uint256 debtBalance = debtToken.balanceOf(deployer);
-        assert(debtBalance != 0);
+        assertTrue(debtBalance != 0);
+    }
+
+    function test_netWorth() public {
+        IERC20(DAI).approve(address(aaveMiniMarket), 100e18);
+        IERC20(USDC).approve(address(aaveMiniMarket), 100e18);
+
+        aaveMiniMarket.deposit(DAI, 100e18);
+        aaveMiniMarket.deposit(USDC, 100e6);
+
+        uint256 netWorth = aaveMiniMarket.getNetWorth(deployer);
+
+        assertTrue(netWorth == 200e18);
+
+        uint256 maxBorrowAmount = aaveMiniMarket.getMaxBorrowAmount(deployer);
+
+        assertTrue(maxBorrowAmount == 160e18);
     }
 }

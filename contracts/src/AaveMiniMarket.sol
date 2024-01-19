@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IERC20, IERC20Metadata } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 import { ISablierV2LockupLinear } from "@sablier/interfaces/ISablierV2LockupLinear.sol";
@@ -37,6 +37,7 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
 
         for (uint256 i = 0; i < tokenData.length; i++) {
             _aTokenOf[tokenData[i].token] = tokenData[i].aToken;
+            _tokenData.push(tokenData[i]);
         }
     }
 
@@ -81,6 +82,23 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
 
     function getBorrowerStreamIds(address borrower) external view returns (uint256[] memory streamIds) {
         streamIds = _borrowerStreamIds[borrower];
+    }
+
+    function getNetWorth(address user) public view returns (uint256) {
+        uint256 tokenLength = _tokenData.length;
+        uint256 netWorth = 0;
+        for (uint256 i = 0; i < tokenLength; i++) {
+            IERC20Metadata token = IERC20Metadata(_tokenData[i].aToken);
+            uint256 userBalance = token.balanceOf(user);
+
+            netWorth += userBalance * _tokenData[i].price / 10 ** token.decimals();
+        }
+        return netWorth;
+    }
+
+    function getMaxBorrowAmount(address user) external view returns (uint256) {
+        uint256 netWorth = getNetWorth(user);
+        return netWorth * 80 / 100;
     }
 
     function distributeFeesToTreasury() external virtual {
