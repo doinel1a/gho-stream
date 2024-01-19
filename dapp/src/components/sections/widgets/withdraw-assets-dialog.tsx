@@ -98,7 +98,7 @@ export default function WithdrawAssetsSection({
               amount={amount}
               maxAmount={token.normalizedBalance}
               maxAmountDescription='Supply balance'
-              areButtonsDisabled={withdrawTransactionState.isLoading}
+              disabled={withdrawTransactionState.isLoading}
               setAmount={setAmount}
             />
 

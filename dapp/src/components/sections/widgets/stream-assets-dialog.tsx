@@ -127,7 +127,6 @@ export default function StreamAssetsDialog({
               amount={amount}
               maxAmount={token.available}
               maxAmountDescription='Available'
-              areButtonsDisabled={streamTransactionState.isLoading}
               disabled={streamTransactionState.isLoading}
               setAmount={setAmount}
             />

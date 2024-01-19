@@ -112,9 +112,7 @@ export default function SupplyAssetsDialog({
               amount={amount}
               maxAmount={token.normalizedBalance}
               maxAmountDescription='Wallet balance'
-              areButtonsDisabled={
-                approveTransactionState.isLoading || supplyTransactionState.isLoading
-              }
+              disabled={approveTransactionState.isLoading || supplyTransactionState.isLoading}
               setAmount={setAmount}
             />
 
