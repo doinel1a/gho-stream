@@ -83,7 +83,13 @@ export default function WithdrawAssetsSection({
           />
         ) : (
           <>
-            <AmountInput id='withdraw-assets' token={token} amount={amount} setAmount={setAmount} />
+            <AmountInput
+              id='withdraw-assets'
+              token={token}
+              amount={amount}
+              isClearButtonDisabled={withdrawTransactionState.isLoading}
+              setAmount={setAmount}
+            />
 
             {withdrawTransactionState.isError && <ErrorBanner>{errorMessage}</ErrorBanner>}
 
