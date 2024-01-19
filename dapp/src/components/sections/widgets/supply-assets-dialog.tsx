@@ -99,8 +99,11 @@ export default function SupplyAssetsDialog({
           <>
             <AmountInput
               id='supply-assets'
-              token={token}
+              tokenName={token.name}
+              tokenIcon={token.icon}
               amount={amount}
+              maxAmount={token.normalizedBalance}
+              maxAmountDescription='Wallet balance'
               areButtonsDisabled={
                 approveTransactionState.isLoading || supplyTransactionState.isLoading
               }

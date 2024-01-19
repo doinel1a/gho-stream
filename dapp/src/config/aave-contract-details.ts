@@ -1,7 +1,7 @@
 import aaveMiniMarketAbi from '../abis/AaveMiniMarket.json';
 
 const aaveContractDetails = {
-  address: '0x86454EF8dB62Fc2cf9C54fe33E843199074EBeBC',
+  address: '0x11758C12D54Fdd24e412e9F495A47E9723f55f80',
   artifacts: aaveMiniMarketAbi
 };
 

@@ -18,6 +18,7 @@ import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet
 
 const SupplyAssetsSection = React.lazy(() => import('@/components/sections/supply-assets'));
 const SuppliedAssetsSection = React.lazy(() => import('@/components/sections/supplied-assets'));
+const AssetsToStreamSection = React.lazy(() => import('@/components/sections/assets-to-stream'));
 
 export default function HomePage() {
   const { isConnected, address } = useAccount();
@@ -191,25 +192,37 @@ export default function HomePage() {
       {ethersProvider ? (
         isConnected ? (
           <div className='flex w-full items-start gap-5'>
-            <Suspense fallback={<Skeleton className='h-52 w-1/2' />}>
-              <SupplyAssetsSection
-                ethersProvider={ethersProvider}
-                walletAssetsState={walletAssetsState}
-                className='w-1/2'
-                defaultExpanded
-                onCloseClick={onCloseButtonClick}
-              />
-            </Suspense>
+            <div className='flex w-1/2 flex-col gap-5'>
+              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                <SuppliedAssetsSection
+                  ethersProvider={ethersProvider}
+                  suppliedTransactionState={suppliedTransactionState}
+                  className='w-full'
+                  defaultExpanded
+                  onCloseClick={onCloseButtonClick}
+                />
+              </Suspense>
 
-            <Suspense fallback={<Skeleton className='h-52 w-1/2' />}>
-              <SuppliedAssetsSection
-                ethersProvider={ethersProvider}
-                suppliedTransactionState={suppliedTransactionState}
-                className='w-1/2'
-                defaultExpanded
-                onCloseClick={onCloseButtonClick}
-              />
-            </Suspense>
+              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                <SupplyAssetsSection
+                  ethersProvider={ethersProvider}
+                  walletAssetsState={walletAssetsState}
+                  className='w-full'
+                  defaultExpanded
+                  onCloseClick={onCloseButtonClick}
+                />
+              </Suspense>
+            </div>
+
+            <div className='flex w-1/2 flex-col gap-5'>
+              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                <AssetsToStreamSection
+                  ethersProvider={ethersProvider}
+                  className='w-full'
+                  defaultExpanded
+                />
+              </Suspense>
+            </div>
           </div>
         ) : (
           <div>

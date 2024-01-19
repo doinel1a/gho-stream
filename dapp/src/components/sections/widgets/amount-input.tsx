@@ -1,6 +1,7 @@
 import React from 'react';
 
-import type { IToken } from '@/interfaces/token';
+// eslint-disable-next-line unicorn/prevent-abbreviations
+import type { InputProps } from '../../ui/input';
 
 import { X } from 'lucide-react';
 
@@ -9,20 +10,26 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Label } from '../../ui/label';
 
-interface IAmountInput {
-  id: string;
-  token: IToken;
+interface IAmountInput extends InputProps {
+  tokenName: string;
+  tokenIcon: string;
   amount: string;
+  maxAmount: number;
+  maxAmountDescription: string;
   areButtonsDisabled: boolean;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export default function AmountInput({
   id,
-  token,
+  tokenName,
+  tokenIcon,
   amount,
+  maxAmount,
+  maxAmountDescription,
   areButtonsDisabled,
-  setAmount
+  setAmount,
+  ...properties
 }: IAmountInput) {
   return (
     <div className='grid flex-1 gap-2'>
@@ -37,6 +44,7 @@ export default function AmountInput({
           placeholder='0.00'
           className='h-16 text-xl'
           onChange={(event) => setAmount(event.target.value)}
+          {...properties}
         />
 
         <div className='absolute right-3 flex flex-col gap-y-1 bg-background'>
@@ -54,23 +62,25 @@ export default function AmountInput({
             )}
 
             <Img
-              src={token.icon}
-              alt={`${token.name}'s logo`}
+              src={tokenIcon}
+              alt={`${tokenName}'s logo`}
               width={24}
               height={24}
               className='h-6 w-6 rounded-full'
             />
-            <span className='font-semibold'>{token.name}</span>
+            <span className='font-semibold'>{tokenName}</span>
           </div>
 
           <div className='flex items-center gap-x-1.5'>
-            <span className='text-xs'>Wallet balance {token.normalizedBalance}</span>
+            <span className='text-xs'>
+              {maxAmountDescription} {maxAmount}
+            </span>
 
             <Button
               variant='ghost'
               className='h-5 px-0 py-1 text-xs'
-              disabled={amount === token.normalizedBalance.toString() || areButtonsDisabled}
-              onClick={() => setAmount(token.normalizedBalance.toString())}
+              disabled={amount === maxAmount.toString() || areButtonsDisabled}
+              onClick={() => setAmount(maxAmount.toString())}
             >
               MAX
             </Button>
