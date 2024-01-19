@@ -101,7 +101,7 @@ export default function SupplyAssetsDialog({
               id='supply-assets'
               token={token}
               amount={amount}
-              isClearButtonDisabled={
+              areButtonsDisabled={
                 approveTransactionState.isLoading || supplyTransactionState.isLoading
               }
               setAmount={setAmount}

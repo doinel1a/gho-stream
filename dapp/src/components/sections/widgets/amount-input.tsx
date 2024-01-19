@@ -13,7 +13,7 @@ interface IAmountInput {
   id: string;
   token: IToken;
   amount: string;
-  isClearButtonDisabled: boolean;
+  areButtonsDisabled: boolean;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -21,7 +21,7 @@ export default function AmountInput({
   id,
   token,
   amount,
-  isClearButtonDisabled,
+  areButtonsDisabled,
   setAmount
 }: IAmountInput) {
   return (
@@ -46,7 +46,7 @@ export default function AmountInput({
                 size='icon'
                 variant='outline'
                 className='mr-2.5 h-4 w-4 rounded-full bg-muted'
-                disabled={isClearButtonDisabled}
+                disabled={areButtonsDisabled}
                 onClick={() => setAmount('')}
               >
                 <X className='h-2.5 w-2.5 text-muted-foreground' />
@@ -69,7 +69,7 @@ export default function AmountInput({
             <Button
               variant='ghost'
               className='h-5 px-0 py-1 text-xs'
-              disabled={amount === token.normalizedBalance.toString()}
+              disabled={amount === token.normalizedBalance.toString() || areButtonsDisabled}
               onClick={() => setAmount(token.normalizedBalance.toString())}
             >
               MAX

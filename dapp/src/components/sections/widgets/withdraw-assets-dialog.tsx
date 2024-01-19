@@ -87,7 +87,7 @@ export default function WithdrawAssetsSection({
               id='withdraw-assets'
               token={token}
               amount={amount}
-              isClearButtonDisabled={withdrawTransactionState.isLoading}
+              areButtonsDisabled={withdrawTransactionState.isLoading}
               setAmount={setAmount}
             />
 
