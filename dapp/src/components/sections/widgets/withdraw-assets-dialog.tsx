@@ -47,7 +47,6 @@ export default function WithdrawAssetsSection({
       : 'Error with your transaction.'
     : 'Error with your transaction.';
 
-  // TODO: Could be removed and handle resets on "onCloseClick"
   useEffect(() => {
     if (!isDialogOpen) {
       setAmount('');
@@ -60,7 +59,16 @@ export default function WithdrawAssetsSection({
   }, [isDialogOpen, dispatchWithdrawTransaction]);
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(isOpen) => {
+        if (withdrawTransactionState.isLoading) {
+          return;
+        }
+
+        setIsDialogOpen(isOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant='secondary' className='w-20'>
           Withdraw

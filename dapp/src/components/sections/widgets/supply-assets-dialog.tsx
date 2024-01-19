@@ -58,7 +58,6 @@ export default function SupplyAssetsDialog({
         : 'Error with your transaction.'
       : 'Error with your transaction.';
 
-  // TODO: Could be removed and handle resets on "onCloseClick"
   useEffect(() => {
     if (!isDialogOpen) {
       setAmount('');
@@ -76,7 +75,16 @@ export default function SupplyAssetsDialog({
   }, [isDialogOpen, dispatchApproveTransaction, dispatchSupplyTransaction]);
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog
+      open={isDialogOpen}
+      onOpenChange={(isOpen) => {
+        if (approveTransactionState.isLoading || supplyTransactionState.isLoading) {
+          return;
+        }
+
+        setIsDialogOpen(isOpen);
+      }}
+    >
       <DialogTrigger asChild>
         <Button className='w-16'>Supply</Button>
       </DialogTrigger>
