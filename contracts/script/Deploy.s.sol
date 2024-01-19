@@ -7,6 +7,7 @@ import { IAToken } from "@aave/core-v3/contracts/interfaces/IAToken.sol";
 import { MockAToken } from "src/mocks/MockAToken.sol";
 import { AaveMiniMarket } from "src/AaveMiniMarket.sol";
 import { console } from "forge-std/console.sol";
+import { GhoDebtToken } from "src/GhoDebtToken.sol";
 
 contract DeployScript is Script {
     address public deployer;
@@ -14,6 +15,8 @@ contract DeployScript is Script {
     IERC20 public WETH = IERC20(0xC558DBdd856501FCd9aaF1E62eae57A9F0629a3c);
     IERC20 public DAI = IERC20(0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357);
     IERC20 public USDC = IERC20(0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8);
+
+    GhoDebtToken public debtToken;
 
     IERC20[] public tokens;
     address[] public aTokens;
@@ -36,8 +39,11 @@ contract DeployScript is Script {
 
         AaveMiniMarket market = new AaveMiniMarket(tokens, aTokens);
 
+        debtToken = new GhoDebtToken(address(market));
+
         vm.stopBroadcast();
 
         console.log("AaveMiniMarket deployed at", address(market));
+        console.log("GhoDebtToken deployed at", address(debtToken));
     }
 }
