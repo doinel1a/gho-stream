@@ -13,6 +13,7 @@ interface IAmountInput {
   tokenIcon: string;
   amount: string;
   maxAmount: number;
+  maxAmountDescription: string;
   areButtonsDisabled: boolean;
   setAmount: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -21,8 +22,9 @@ export default function AmountInput({
   id,
   tokenName,
   tokenIcon,
-  maxAmount,
   amount,
+  maxAmount,
+  maxAmountDescription,
   areButtonsDisabled,
   setAmount
 }: IAmountInput) {
@@ -66,7 +68,9 @@ export default function AmountInput({
           </div>
 
           <div className='flex items-center gap-x-1.5'>
-            <span className='text-xs'>Wallet balance {maxAmount}</span>
+            <span className='text-xs'>
+              {maxAmountDescription} {maxAmount}
+            </span>
 
             <Button
               variant='ghost'
