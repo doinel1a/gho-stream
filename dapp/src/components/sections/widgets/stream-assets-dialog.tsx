@@ -58,12 +58,14 @@ export default function StreamAssetsDialog({
   const [durationInDays, setDurationInDays] = useState('');
   const [durationInHours, setDurationInHours] = useState('');
 
-  const isAmountInputValid = amount.trim() !== '' && amount !== '0';
-  const areInputsValid =
-    isAmountInputValid &&
-    recipient.trim() !== '' &&
+  const isAmountInputValid =
+    amount.trim() !== '' && amount !== '0' && Number(amount) <= maxAmountToStream;
+
+  const isDurationInputValid =
     (durationInDays.trim() !== '' || durationInHours.trim() !== '') &&
     (durationInDays !== '0' || durationInHours !== '0');
+
+  const areInputsValid = isAmountInputValid && recipient.trim() !== '' && isDurationInputValid;
 
   const startDate = new Date();
   const endDatePrevision = addHours(
@@ -244,9 +246,7 @@ export default function StreamAssetsDialog({
             <LoadingButton
               isLoading={streamTransactionState.isLoading}
               loadingContent={`Streaming ${ghoTokenDetails.name}`}
-              defaultContent={
-                isAmountInputValid ? `Stream ${ghoTokenDetails.name}` : 'Enter an amount'
-              }
+              defaultContent={areInputsValid ? `Stream ${ghoTokenDetails.name}` : 'Enter an amount'}
               disabled={!areInputsValid || streamTransactionState.isLoading}
               onClick={() => {
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises

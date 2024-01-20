@@ -49,7 +49,7 @@ export default function SupplyAssetsDialog({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
-  const isInputValid = amount !== '' && amount !== '0';
+  const isInputValid = amount !== '' && amount !== '0' && Number(amount) <= token.normalizedBalance;
 
   const errorMessage =
     approveTransactionState.errorCode ?? supplyTransactionState.errorCode

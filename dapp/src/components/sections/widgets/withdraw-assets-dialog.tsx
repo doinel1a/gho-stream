@@ -39,7 +39,7 @@ export default function WithdrawAssetsSection({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
-  const isInputValid = amount !== '' && amount !== '0';
+  const isInputValid = amount !== '' && amount !== '0' && Number(amount) <= token.normalizedBalance;
 
   const errorMessage = withdrawTransactionState.errorCode
     ? withdrawTransactionState.errorCode === 4001
