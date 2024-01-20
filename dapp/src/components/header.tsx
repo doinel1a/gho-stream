@@ -1,8 +1,19 @@
 import React from 'react';
 
-import Img from './img';
+import type { TNetWorthTransactionState } from '@/reducers/net-worth-transaction';
 
-export default function Header() {
+import { useAccount } from 'wagmi';
+
+import Img from './img';
+import { Skeleton } from './ui/skeleton';
+
+interface IHeader {
+  netWorthTransactionState: TNetWorthTransactionState;
+}
+
+export default function Header({ netWorthTransactionState }: IHeader) {
+  const { isConnected } = useAccount();
+
   return (
     <header className='h-32 w-full'>
       <div className='flex flex-col gap-y-2.5'>
@@ -27,15 +38,24 @@ export default function Header() {
           <h1 className='text-3xl font-bold'>Ethereum Market</h1>
         </div>
 
-        <div className='flex flex-col'>
-          <p className='text-sm text-muted-foreground'>Net worth</p>
+        {isConnected &&
+          (netWorthTransactionState.isLoading ? (
+            <Skeleton className='h-12 w-24' />
+          ) : (
+            <div className='flex flex-col'>
+              <p className='text-sm text-muted-foreground'>Net worth</p>
 
-          <div className='flex items-center gap-x-1 text-xl'>
-            {/* Dollar sign code */}
-            <span className='font-bold text-muted-foreground'>&#36;</span>
-            <span className='font-bold'>540.00</span>
-          </div>
-        </div>
+              <div className='flex items-center gap-x-1 text-xl'>
+                {/* Dollar sign code */}
+                <span className='font-bold text-muted-foreground'>&#36;</span>
+                <span className='font-bold'>
+                  {!netWorthTransactionState.netWorth || netWorthTransactionState.netWorth === 0
+                    ? '0.00'
+                    : netWorthTransactionState.netWorth}
+                </span>
+              </div>
+            </div>
+          ))}
       </div>
     </header>
   );

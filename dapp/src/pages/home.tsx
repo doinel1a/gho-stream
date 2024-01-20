@@ -20,6 +20,10 @@ import {
   maxAmountToBorrowTransactionReducer
 } from '@/reducers/max-amount-to-borrow-transaction';
 import {
+  netWorthTransactionInitialState,
+  netWorthTransactionReducer
+} from '@/reducers/net-worth-transaction';
+import {
   streamedTransactionInitialState,
   streamedTransactionReducer
 } from '@/reducers/streamed-transaction';
@@ -52,6 +56,11 @@ export default function HomePage() {
   const [streamedTransactionState, dispatchStreamedTransaction] = useReducer(
     streamedTransactionReducer,
     streamedTransactionInitialState
+  );
+
+  const [netWorthTransactionState, dispatchNetWorthTransaction] = useReducer(
+    netWorthTransactionReducer,
+    netWorthTransactionInitialState
   );
 
   const [maxAmountToBorrowTransactionState, dispatchMaxAmountToBorrowTransaction] = useReducer(
@@ -268,6 +277,50 @@ export default function HomePage() {
     }
   }, [memorizedGetStreamedAssets]);
 
+  const memorizedGetNetWorth = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
+    return async function getNetWorth() {
+      dispatchNetWorthTransaction({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.artifacts.abi,
+        ethersProvider
+      );
+
+      const netWorthResponse = (await aaveContract.getNetWorth(address)) as bigint;
+
+      if (netWorthResponse) {
+        dispatchNetWorthTransaction({
+          state: EReducerState.success,
+          payload: roundDecimal(Number(formatUnits(netWorthResponse, 18)), 2)
+        });
+      }
+
+      console.log('netWorthResponse', formatUnits(netWorthResponse, 18));
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    if (typeof memorizedGetNetWorth === 'function') {
+      memorizedGetNetWorth().catch((error: unknown) => {
+        dispatchNetWorthTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        // eslint-disable-next-line sonarjs/no-duplicate-string
+        console.error('Error fetching net worth', error);
+      });
+    }
+  }, [memorizedGetNetWorth]);
+
   const memorizedGetMaxAmountToBorrow = useMemo(() => {
     if (!ethersProvider) {
       return undefined;
@@ -335,6 +388,17 @@ export default function HomePage() {
       });
     }
 
+    if (typeof memorizedGetNetWorth === 'function') {
+      memorizedGetNetWorth().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching net worth', error);
+      });
+    }
+
     if (typeof memorizedGetMaxAmountToBorrow === 'function') {
       memorizedGetMaxAmountToBorrow().catch((error: unknown) => {
         dispatchSuppliedTransaction({
@@ -369,11 +433,22 @@ export default function HomePage() {
         console.error('Error fetching max amount to borrow', error);
       });
     }
+
+    if (typeof memorizedGetNetWorth === 'function') {
+      memorizedGetNetWorth().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching net worth', error);
+      });
+    }
   }
 
   return (
     <>
-      <Header />
+      <Header netWorthTransactionState={netWorthTransactionState} />
 
       {ethersProvider ? (
         isConnected ? (
