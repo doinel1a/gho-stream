@@ -9,7 +9,7 @@ import ExpandableSecion from '../expandable-section';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
-const tableHeaders = ['Status', 'To', 'Value', 'Timeline', 'Streamed'];
+const tableHeaders = ['Status', 'To', 'Streamed', 'Timeline'];
 
 interface IStreamedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   streamedTransactionState: TStreamedTransactionState;
@@ -51,11 +51,13 @@ export default function StreamedAssetsSection({
                 <TableCell>
                   {stream.recipient.slice(0, 5) + '...' + stream.recipient.slice(-3)}
                 </TableCell>
-                <TableCell>{stream.depositAmount}</TableCell>
-                <TableCell>{stream.endTime}</TableCell>
                 <TableCell>
-                  {roundDecimal((stream.streamedAmount / stream.depositAmount) * 100, 2)} %
+                  {roundDecimal(
+                    stream.depositAmount * (stream.streamedAmount / stream.depositAmount),
+                    2
+                  )}
                 </TableCell>
+                <TableCell>{stream.endTime}</TableCell>
               </TableRow>
             ))}
           </TableBody>
