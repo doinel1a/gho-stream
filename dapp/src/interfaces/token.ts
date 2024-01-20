@@ -15,4 +15,4 @@ interface IToken extends ITokenBase {
   normalizedBalance: number;
 }
 
-export type { ITokenContract, IToken };
+export type { ITokenBase, ITokenContract, IToken };
