@@ -42,14 +42,14 @@ interface ISupplyAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   walletAssetsState: TWalletAssetsState;
   defaultExpanded?: boolean;
-  onCloseClick: () => void;
+  onSupplyDialogClose: () => void;
 }
 
 export default function SupplyAssetsSection({
   ethersProvider,
   walletAssetsState,
   defaultExpanded,
-  onCloseClick,
+  onSupplyDialogClose,
   className,
   ...properties
 }: ISupplyAssetsSection) {
@@ -245,7 +245,7 @@ export default function SupplyAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
-                      onCloseClick={onCloseClick}
+                      onSupplyDialogClose={onSupplyDialogClose}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />

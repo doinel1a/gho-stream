@@ -25,7 +25,7 @@ interface IWithdrawAssetsSection {
   token: IToken;
   withdrawTransactionState: TWithdrawTransactionState;
   onWithdrawClick(tokenName: string, amount: string): Promise<void>;
-  onCloseClick: () => void;
+  onWithdrawDialogClose: () => void;
   dispatchWithdrawTransaction: React.Dispatch<IWithdrawTransactionAction>;
 }
 
@@ -33,7 +33,7 @@ export default function WithdrawAssetsSection({
   token,
   withdrawTransactionState,
   onWithdrawClick,
-  onCloseClick,
+  onWithdrawDialogClose,
   dispatchWithdrawTransaction
 }: IWithdrawAssetsSection) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function WithdrawAssetsSection({
             content={`You withdrew ${amount} ${token.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
-              onCloseClick();
+              onWithdrawDialogClose();
             }}
           />
         ) : (

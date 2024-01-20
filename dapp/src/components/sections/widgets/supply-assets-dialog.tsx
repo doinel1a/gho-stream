@@ -31,7 +31,7 @@ interface ISupplyAssetsDialog {
   supplyTransactionState: TSupplyTransactionState;
   onApproveClick(tokenName: string, amount: string): Promise<void>;
   onSupplyClick(tokenName: string, amount: string): Promise<void>;
-  onCloseClick: () => void;
+  onSupplyDialogClose: () => void;
   dispatchApproveTransaction: React.Dispatch<IApproveTransactionAction>;
   dispatchSupplyTransaction: React.Dispatch<ISupplyTransactionAction>;
 }
@@ -42,7 +42,7 @@ export default function SupplyAssetsDialog({
   supplyTransactionState,
   onApproveClick,
   onSupplyClick,
-  onCloseClick,
+  onSupplyDialogClose,
   dispatchApproveTransaction,
   dispatchSupplyTransaction
 }: ISupplyAssetsDialog) {
@@ -100,7 +100,7 @@ export default function SupplyAssetsDialog({
             content={`You supplied ${amount} ${token.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
-              onCloseClick();
+              onSupplyDialogClose();
             }}
           />
         ) : (
