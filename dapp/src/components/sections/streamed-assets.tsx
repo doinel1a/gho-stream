@@ -8,8 +8,9 @@ import { cn, roundDecimal } from '@/lib/utils';
 import ExpandableSecion from '../expandable-section';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import StreamDetailsDialog from './widgets/stream-details-dialog';
 
-const tableHeaders = ['Status', 'To', 'Streamed', 'Timeline'];
+const tableHeaders = ['Status', 'To', 'Streamed', 'Timeline', ''];
 
 interface IStreamedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   streamedTransactionState: TStreamedTransactionState;
@@ -58,6 +59,9 @@ export default function StreamedAssetsSection({
                   )}
                 </TableCell>
                 <TableCell>{stream.endTime}</TableCell>
+                <TableCell>
+                  <StreamDetailsDialog stream={stream} />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
