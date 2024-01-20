@@ -1,11 +1,15 @@
+/* eslint-disable indent */
+
 import React, { Suspense, useReducer } from 'react';
 
+import type { TMaxAmountToBorrowTransactionState } from '@/reducers/max-amount-to-borrow-transaction';
 import type { BrowserProvider, TransactionResponse } from 'ethers';
 import type { HTMLAttributes } from 'react';
 
 import { ethers, parseUnits } from 'ethers';
 
 import aaveContractDetails from '@/config/aave-contract-details';
+import ghoTokenDetails from '@/config/gho-token-details';
 import EReducerState from '@/constants/reducer-state';
 import { cn } from '@/lib/utils';
 import {
@@ -22,28 +26,16 @@ const StreamAssetsDialog = React.lazy(() => import('./widgets/stream-assets-dial
 
 const tableHeaders = ['Assets', 'Available to stream', ''];
 
-export type TAssetToStream = {
-  name: string;
-  icon: string;
-  available: number;
-};
-
-const assetsToStream: TAssetToStream[] = [
-  {
-    name: 'GHO',
-    icon: 'https://staging.aave.com/icons/tokens/gho.svg',
-    available: 350.69
-  }
-];
-
 interface IAssetsToStreamSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
+  maxAmountToBorrowTransactionState: TMaxAmountToBorrowTransactionState;
   defaultExpanded?: boolean;
   onStreamDialogCloseButtonClick: () => void;
 }
 
 export default function AssetsToStreamSection({
   ethersProvider,
+  maxAmountToBorrowTransactionState,
   defaultExpanded,
   className,
   onStreamDialogCloseButtonClick,
@@ -116,38 +108,46 @@ export default function AssetsToStreamSection({
       defaultExpanded={defaultExpanded}
       {...properties}
     >
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {tableHeaders.map((tableHeader) => (
-              <TableHead key={tableHeader} className='w-[100px]'>
-                {tableHeader}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {assetsToStream.map((token, index) => (
-            <TableRow key={`${token.name}-${index}`}>
+      {maxAmountToBorrowTransactionState.isLoading ? (
+        <Skeleton className='h-20 w-full' />
+      ) : !maxAmountToBorrowTransactionState.maxAmount ||
+        (maxAmountToBorrowTransactionState.isSuccess &&
+          maxAmountToBorrowTransactionState.maxAmount === 0) ? (
+        <div className=''>
+          <p className='text-muted-foreground'>Supply assets as collateral in order to borrow</p>
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {tableHeaders.map((tableHeader) => (
+                <TableHead key={tableHeader} className='w-[100px]'>
+                  {tableHeader}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
               <TableCell>
                 <div className='flex items-center gap-x-2.5'>
                   <Img
-                    src={token.icon}
-                    alt={`${token.name}'s logo`}
+                    src={ghoTokenDetails.icon}
+                    alt={`${ghoTokenDetails.name}'s logo`}
                     width={36}
                     height={36}
                     className='h-9 w-9 rounded-full'
                   />
-                  <span className='font-semibold'>{token.name}</span>
+                  <span className='font-semibold'>{ghoTokenDetails.name}</span>
                 </div>
               </TableCell>
               <TableCell>
-                <span className='font-semibold'>{token.available}</span>
+                <span className='font-semibold'>{maxAmountToBorrowTransactionState.maxAmount}</span>
               </TableCell>
               <TableCell className='flex justify-end'>
                 <Suspense fallback={<Skeleton className='h-10 w-16' />}>
                   <StreamAssetsDialog
-                    token={token}
+                    maxAmountToStream={maxAmountToBorrowTransactionState.maxAmount}
                     streamTransactionState={streamTransactionState}
                     dispatchStreamTransaction={dispatchStreamTransaction}
                     onStreamClick={onStreamClick}
@@ -156,9 +156,9 @@ export default function AssetsToStreamSection({
                 </Suspense>
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableBody>
+        </Table>
+      )}
     </ExpandableSecion>
   );
 }

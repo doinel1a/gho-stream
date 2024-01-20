@@ -6,7 +6,6 @@ import type {
   IStreamTransactionAction,
   TStreamTransactionState
 } from '@/reducers/stream-transaction';
-import type { TAssetToStream } from '../assets-to-stream';
 
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { addDays, addHours, format } from 'date-fns';
@@ -19,6 +18,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '@/components
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import ghoTokenDetails from '@/config/gho-token-details';
 import EReducerState from '@/constants/reducer-state';
 
 import AmountInput from './amount-input';
@@ -37,7 +37,7 @@ const suggestedDurations = [
 ];
 
 interface IStreamAssetsDialog {
-  token: TAssetToStream;
+  maxAmountToStream: number;
   streamTransactionState: TStreamTransactionState;
   dispatchStreamTransaction: React.Dispatch<IStreamTransactionAction>;
   onStreamClick(amount: string, streamDuration: string, streamRecipient: string): Promise<void>;
@@ -45,7 +45,7 @@ interface IStreamAssetsDialog {
 }
 
 export default function StreamAssetsDialog({
-  token,
+  maxAmountToStream,
   streamTransactionState,
   dispatchStreamTransaction,
   onStreamClick,
@@ -109,13 +109,13 @@ export default function StreamAssetsDialog({
       <DialogContent className='sm:max-w-md'>
         {!streamTransactionState.isSuccess && (
           <DialogHeader>
-            <DialogTitle>Stream {token.name}</DialogTitle>
+            <DialogTitle>Stream {ghoTokenDetails.name}</DialogTitle>
           </DialogHeader>
         )}
 
         {streamTransactionState.isSuccess ? (
           <SuccessfulTransaction
-            content={`You streamed ${amount} ${token.name}`}
+            content={`You streamed ${amount} ${ghoTokenDetails.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
               onCloseButtonClick();
@@ -125,10 +125,10 @@ export default function StreamAssetsDialog({
           <>
             <AmountInput
               id='stream-assets'
-              tokenName={token.name}
-              tokenIcon={token.icon}
+              tokenName={ghoTokenDetails.name}
+              tokenIcon={ghoTokenDetails.icon}
               amount={amount}
-              maxAmount={token.available}
+              maxAmount={maxAmountToStream}
               maxAmountDescription='Available'
               disabled={streamTransactionState.isLoading}
               setAmount={setAmount}
@@ -240,8 +240,10 @@ export default function StreamAssetsDialog({
 
             <LoadingButton
               isLoading={streamTransactionState.isLoading}
-              loadingContent={`Streaming ${token.name}`}
-              defaultContent={isAmountInputValid ? `Stream ${token.name}` : 'Enter an amount'}
+              loadingContent={`Streaming ${ghoTokenDetails.name}`}
+              defaultContent={
+                isAmountInputValid ? `Stream ${ghoTokenDetails.name}` : 'Enter an amount'
+              }
               disabled={!areInputsValid || streamTransactionState.isLoading}
               onClick={() => {
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises

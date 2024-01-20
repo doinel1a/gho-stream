@@ -16,6 +16,10 @@ import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
 import { roundDecimal } from '@/lib/utils';
 import {
+  maxAmountToBorrowTransactionInitialState,
+  maxAmountToBorrowTransactionReducer
+} from '@/reducers/max-amount-to-borrow-transaction';
+import {
   streamedTransactionInitialState,
   streamedTransactionReducer
 } from '@/reducers/streamed-transaction';
@@ -48,6 +52,11 @@ export default function HomePage() {
   const [streamedTransactionState, dispatchStreamedTransaction] = useReducer(
     streamedTransactionReducer,
     streamedTransactionInitialState
+  );
+
+  const [maxAmountToBorrowTransactionState, dispatchMaxAmountToBorrowTransaction] = useReducer(
+    maxAmountToBorrowTransactionReducer,
+    maxAmountToBorrowTransactionInitialState
   );
 
   useEffect(() => {
@@ -259,6 +268,50 @@ export default function HomePage() {
     }
   }, [memorizedGetStreamedAssets]);
 
+  const memorizedGetMaxAmountToBorrow = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
+    return async function getMaxAmountToBorrow() {
+      dispatchMaxAmountToBorrowTransaction({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.artifacts.abi,
+        ethersProvider
+      );
+
+      const maxAmountToBorrowResponse = (await aaveContract.getMaxBorrowAmount(address)) as bigint;
+
+      if (maxAmountToBorrowResponse) {
+        dispatchMaxAmountToBorrowTransaction({
+          state: EReducerState.success,
+          payload: roundDecimal(Number(formatUnits(maxAmountToBorrowResponse, 18)), 2)
+        });
+      }
+
+      console.log('maxAmountToBorrowResponse', formatUnits(maxAmountToBorrowResponse, 18));
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    if (typeof memorizedGetMaxAmountToBorrow === 'function') {
+      memorizedGetMaxAmountToBorrow().catch((error: unknown) => {
+        dispatchMaxAmountToBorrowTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        // eslint-disable-next-line sonarjs/no-duplicate-string
+        console.error('Error fetching max amount to borrow', error);
+      });
+    }
+  }, [memorizedGetMaxAmountToBorrow]);
+
   async function onCloseButtonClick() {
     if (typeof memoizedGetWalletAssets === 'function') {
       memoizedGetWalletAssets().catch((error: unknown) => {
@@ -281,6 +334,17 @@ export default function HomePage() {
         console.error('Error fetching supplied tokens', error);
       });
     }
+
+    if (typeof memorizedGetMaxAmountToBorrow === 'function') {
+      memorizedGetMaxAmountToBorrow().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching max amount to borrow', error);
+      });
+    }
   }
 
   async function onStreamDialogCloseButtonClick() {
@@ -292,6 +356,17 @@ export default function HomePage() {
         });
 
         console.error('Error fetching streamed assets', error);
+      });
+    }
+
+    if (typeof memorizedGetMaxAmountToBorrow === 'function') {
+      memorizedGetMaxAmountToBorrow().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching max amount to borrow', error);
       });
     }
   }
@@ -337,6 +412,7 @@ export default function HomePage() {
               <Suspense fallback={<Skeleton className='h-52 w-full' />}>
                 <AssetsToStreamSection
                   ethersProvider={ethersProvider}
+                  maxAmountToBorrowTransactionState={maxAmountToBorrowTransactionState}
                   className='w-full'
                   defaultExpanded
                   onStreamDialogCloseButtonClick={onStreamDialogCloseButtonClick}
