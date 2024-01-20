@@ -143,7 +143,7 @@ export default function StreamAssetsDialog({
                 id='recipient-address'
                 value={recipient}
                 disabled={streamTransactionState.isLoading}
-                placeholder='Fill in address or ENS'
+                placeholder='Fill in address'
                 onChange={(event) => setRecipient(event.target.value)}
               />
             </div>
