@@ -30,7 +30,7 @@ interface IAssetsToStreamSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   maxAmountToBorrowTransactionState: TMaxAmountToBorrowTransactionState;
   defaultExpanded?: boolean;
-  onStreamDialogCloseButtonClick: () => void;
+  onStreamDialogClose: () => void;
 }
 
 export default function AssetsToStreamSection({
@@ -38,7 +38,7 @@ export default function AssetsToStreamSection({
   maxAmountToBorrowTransactionState,
   defaultExpanded,
   className,
-  onStreamDialogCloseButtonClick,
+  onStreamDialogClose,
   ...properties
 }: IAssetsToStreamSection) {
   const [streamTransactionState, dispatchStreamTransaction] = useReducer(
@@ -151,7 +151,7 @@ export default function AssetsToStreamSection({
                     streamTransactionState={streamTransactionState}
                     dispatchStreamTransaction={dispatchStreamTransaction}
                     onStreamClick={onStreamClick}
-                    onCloseButtonClick={onStreamDialogCloseButtonClick}
+                    onStreamDialogClose={onStreamDialogClose}
                   />
                 </Suspense>
               </TableCell>

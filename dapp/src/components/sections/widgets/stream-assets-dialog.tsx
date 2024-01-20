@@ -41,7 +41,7 @@ interface IStreamAssetsDialog {
   streamTransactionState: TStreamTransactionState;
   dispatchStreamTransaction: React.Dispatch<IStreamTransactionAction>;
   onStreamClick(amount: string, streamDuration: string, streamRecipient: string): Promise<void>;
-  onCloseButtonClick: () => void;
+  onStreamDialogClose: () => void;
 }
 
 export default function StreamAssetsDialog({
@@ -49,7 +49,7 @@ export default function StreamAssetsDialog({
   streamTransactionState,
   dispatchStreamTransaction,
   onStreamClick,
-  onCloseButtonClick
+  onStreamDialogClose
 }: IStreamAssetsDialog) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -58,12 +58,14 @@ export default function StreamAssetsDialog({
   const [durationInDays, setDurationInDays] = useState('');
   const [durationInHours, setDurationInHours] = useState('');
 
-  const isAmountInputValid = amount.trim() !== '' && amount !== '0';
-  const areInputsValid =
-    isAmountInputValid &&
-    recipient.trim() !== '' &&
+  const isAmountInputValid =
+    amount.trim() !== '' && amount !== '0' && Number(amount) <= maxAmountToStream;
+
+  const isDurationInputValid =
     (durationInDays.trim() !== '' || durationInHours.trim() !== '') &&
     (durationInDays !== '0' || durationInHours !== '0');
+
+  const areInputsValid = isAmountInputValid && recipient.trim() !== '' && isDurationInputValid;
 
   const startDate = new Date();
   const endDatePrevision = addHours(
@@ -92,17 +94,20 @@ export default function StreamAssetsDialog({
     }
   }, [isDialogOpen, dispatchStreamTransaction]);
 
-  return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={(isOpen) => {
-        if (streamTransactionState.isLoading) {
-          return;
-        }
+  function onDialogOpenChange(isOpen: boolean) {
+    if (streamTransactionState.isLoading) {
+      return;
+    }
 
-        setIsDialogOpen(isOpen);
-      }}
-    >
+    if (!isOpen && streamTransactionState.isSuccess) {
+      onStreamDialogClose();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
       <DialogTrigger asChild>
         <Button className='w-16'>Stream</Button>
       </DialogTrigger>
@@ -118,7 +123,7 @@ export default function StreamAssetsDialog({
             content={`You streamed ${amount} ${ghoTokenDetails.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
-              onCloseButtonClick();
+              onStreamDialogClose();
             }}
           />
         ) : (
@@ -143,7 +148,7 @@ export default function StreamAssetsDialog({
                 id='recipient-address'
                 value={recipient}
                 disabled={streamTransactionState.isLoading}
-                placeholder='Fill in address or ENS'
+                placeholder='Fill in address'
                 onChange={(event) => setRecipient(event.target.value)}
               />
             </div>
@@ -241,9 +246,7 @@ export default function StreamAssetsDialog({
             <LoadingButton
               isLoading={streamTransactionState.isLoading}
               loadingContent={`Streaming ${ghoTokenDetails.name}`}
-              defaultContent={
-                isAmountInputValid ? `Stream ${ghoTokenDetails.name}` : 'Enter an amount'
-              }
+              defaultContent={areInputsValid ? `Stream ${ghoTokenDetails.name}` : 'Enter an amount'}
               disabled={!areInputsValid || streamTransactionState.isLoading}
               onClick={() => {
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises

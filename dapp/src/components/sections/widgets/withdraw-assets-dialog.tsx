@@ -25,7 +25,7 @@ interface IWithdrawAssetsSection {
   token: IToken;
   withdrawTransactionState: TWithdrawTransactionState;
   onWithdrawClick(tokenName: string, amount: string): Promise<void>;
-  onCloseClick: () => void;
+  onWithdrawDialogClose: () => void;
   dispatchWithdrawTransaction: React.Dispatch<IWithdrawTransactionAction>;
 }
 
@@ -33,13 +33,13 @@ export default function WithdrawAssetsSection({
   token,
   withdrawTransactionState,
   onWithdrawClick,
-  onCloseClick,
+  onWithdrawDialogClose,
   dispatchWithdrawTransaction
 }: IWithdrawAssetsSection) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
-  const isInputValid = amount !== '' && amount !== '0';
+  const isInputValid = amount !== '' && amount !== '0' && Number(amount) <= token.normalizedBalance;
 
   const errorMessage = withdrawTransactionState.errorCode
     ? withdrawTransactionState.errorCode === 4001
@@ -58,17 +58,20 @@ export default function WithdrawAssetsSection({
     }
   }, [isDialogOpen, dispatchWithdrawTransaction]);
 
-  return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={(isOpen) => {
-        if (withdrawTransactionState.isLoading) {
-          return;
-        }
+  function onDialogOpenChange(isOpen: boolean) {
+    if (withdrawTransactionState.isLoading) {
+      return;
+    }
 
-        setIsDialogOpen(isOpen);
-      }}
-    >
+    if (!isOpen && withdrawTransactionState.isSuccess) {
+      onWithdrawDialogClose();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
       <DialogTrigger asChild>
         <Button variant='secondary' className='w-20'>
           Withdraw
@@ -86,7 +89,7 @@ export default function WithdrawAssetsSection({
             content={`You withdrew ${amount} ${token.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
-              onCloseClick();
+              onWithdrawDialogClose();
             }}
           />
         ) : (

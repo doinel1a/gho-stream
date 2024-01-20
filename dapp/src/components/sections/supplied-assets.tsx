@@ -37,14 +37,14 @@ interface ISuppliedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   suppliedTransactionState: TSuppliedTransactionState;
   defaultExpanded?: boolean;
-  onCloseClick: () => void;
+  onSupplyOrWithdrawDialogClose: () => void;
 }
 
 export default function SuppliedAssetsSection({
   ethersProvider,
   suppliedTransactionState,
   defaultExpanded,
-  onCloseClick,
+  onSupplyOrWithdrawDialogClose,
   className,
   ...properties
 }: ISuppliedAssetsSection) {
@@ -294,7 +294,7 @@ export default function SuppliedAssetsSection({
                       supplyTransactionState={supplyTransactionState}
                       onApproveClick={onApproveClick}
                       onSupplyClick={onSupplyClick}
-                      onCloseClick={onCloseClick}
+                      onSupplyDialogClose={onSupplyOrWithdrawDialogClose}
                       dispatchApproveTransaction={dispatchApproveTransaction}
                       dispatchSupplyTransaction={dispatchSupplyTransaction}
                     />
@@ -305,7 +305,7 @@ export default function SuppliedAssetsSection({
                       token={token}
                       withdrawTransactionState={withdrawTransactionState}
                       onWithdrawClick={onWithdrawClick}
-                      onCloseClick={onCloseClick}
+                      onWithdrawDialogClose={onSupplyOrWithdrawDialogClose}
                       dispatchWithdrawTransaction={dispatchWithdrawTransaction}
                     />
                   </Suspense>

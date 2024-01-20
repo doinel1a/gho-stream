@@ -365,7 +365,7 @@ export default function HomePage() {
     }
   }, [memorizedGetMaxAmountToBorrow]);
 
-  async function onCloseButtonClick() {
+  async function onSupplyOrWithdrawDialogClose() {
     if (typeof memoizedGetWalletAssets === 'function') {
       memoizedGetWalletAssets().catch((error: unknown) => {
         dispatchWalletAssets({
@@ -411,7 +411,7 @@ export default function HomePage() {
     }
   }
 
-  async function onStreamDialogCloseButtonClick() {
+  async function onStreamDialogClose() {
     if (typeof memorizedGetStreamedAssets === 'function') {
       memorizedGetStreamedAssets().catch((error: unknown) => {
         dispatchSuppliedTransaction({
@@ -460,7 +460,7 @@ export default function HomePage() {
                   suppliedTransactionState={suppliedTransactionState}
                   className='w-full'
                   defaultExpanded
-                  onCloseClick={onCloseButtonClick}
+                  onSupplyOrWithdrawDialogClose={onSupplyOrWithdrawDialogClose}
                 />
               </Suspense>
 
@@ -470,7 +470,7 @@ export default function HomePage() {
                   walletAssetsState={walletAssetsState}
                   className='w-full'
                   defaultExpanded
-                  onCloseClick={onCloseButtonClick}
+                  onSupplyDialogClose={onSupplyOrWithdrawDialogClose}
                 />
               </Suspense>
             </div>
@@ -490,7 +490,7 @@ export default function HomePage() {
                   maxAmountToBorrowTransactionState={maxAmountToBorrowTransactionState}
                   className='w-full'
                   defaultExpanded
-                  onStreamDialogCloseButtonClick={onStreamDialogCloseButtonClick}
+                  onStreamDialogClose={onStreamDialogClose}
                 />
               </Suspense>
             </div>

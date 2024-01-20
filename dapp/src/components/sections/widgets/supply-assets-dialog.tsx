@@ -31,7 +31,7 @@ interface ISupplyAssetsDialog {
   supplyTransactionState: TSupplyTransactionState;
   onApproveClick(tokenName: string, amount: string): Promise<void>;
   onSupplyClick(tokenName: string, amount: string): Promise<void>;
-  onCloseClick: () => void;
+  onSupplyDialogClose: () => void;
   dispatchApproveTransaction: React.Dispatch<IApproveTransactionAction>;
   dispatchSupplyTransaction: React.Dispatch<ISupplyTransactionAction>;
 }
@@ -42,14 +42,14 @@ export default function SupplyAssetsDialog({
   supplyTransactionState,
   onApproveClick,
   onSupplyClick,
-  onCloseClick,
+  onSupplyDialogClose,
   dispatchApproveTransaction,
   dispatchSupplyTransaction
 }: ISupplyAssetsDialog) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [amount, setAmount] = useState('');
 
-  const isInputValid = amount !== '' && amount !== '0';
+  const isInputValid = amount !== '' && amount !== '0' && Number(amount) <= token.normalizedBalance;
 
   const errorMessage =
     approveTransactionState.errorCode ?? supplyTransactionState.errorCode
@@ -74,17 +74,20 @@ export default function SupplyAssetsDialog({
     }
   }, [isDialogOpen, dispatchApproveTransaction, dispatchSupplyTransaction]);
 
-  return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={(isOpen) => {
-        if (approveTransactionState.isLoading || supplyTransactionState.isLoading) {
-          return;
-        }
+  function onDialogOpenChange(isOpen: boolean) {
+    if (approveTransactionState.isLoading || supplyTransactionState.isLoading) {
+      return;
+    }
 
-        setIsDialogOpen(isOpen);
-      }}
-    >
+    if (!isOpen && approveTransactionState.isSuccess && supplyTransactionState.isSuccess) {
+      onSupplyDialogClose();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
       <DialogTrigger asChild>
         <Button className='w-16'>Supply</Button>
       </DialogTrigger>
@@ -100,7 +103,7 @@ export default function SupplyAssetsDialog({
             content={`You supplied ${amount} ${token.name}`}
             onCloseClick={() => {
               setIsDialogOpen((previousState) => !previousState);
-              onCloseClick();
+              onSupplyDialogClose();
             }}
           />
         ) : (
