@@ -58,17 +58,20 @@ export default function WithdrawAssetsSection({
     }
   }, [isDialogOpen, dispatchWithdrawTransaction]);
 
-  return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={(isOpen) => {
-        if (withdrawTransactionState.isLoading) {
-          return;
-        }
+  function onDialogOpenChange(isOpen: boolean) {
+    if (withdrawTransactionState.isLoading) {
+      return;
+    }
 
-        setIsDialogOpen(isOpen);
-      }}
-    >
+    if (!isOpen && withdrawTransactionState.isSuccess) {
+      onWithdrawDialogClose();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
       <DialogTrigger asChild>
         <Button variant='secondary' className='w-20'>
           Withdraw

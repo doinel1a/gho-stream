@@ -92,17 +92,20 @@ export default function StreamAssetsDialog({
     }
   }, [isDialogOpen, dispatchStreamTransaction]);
 
-  return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={(isOpen) => {
-        if (streamTransactionState.isLoading) {
-          return;
-        }
+  function onDialogOpenChange(isOpen: boolean) {
+    if (streamTransactionState.isLoading) {
+      return;
+    }
 
-        setIsDialogOpen(isOpen);
-      }}
-    >
+    if (!isOpen && streamTransactionState.isSuccess) {
+      onStreamDialogClose();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
       <DialogTrigger asChild>
         <Button className='w-16'>Stream</Button>
       </DialogTrigger>

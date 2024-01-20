@@ -74,17 +74,20 @@ export default function SupplyAssetsDialog({
     }
   }, [isDialogOpen, dispatchApproveTransaction, dispatchSupplyTransaction]);
 
-  return (
-    <Dialog
-      open={isDialogOpen}
-      onOpenChange={(isOpen) => {
-        if (approveTransactionState.isLoading || supplyTransactionState.isLoading) {
-          return;
-        }
+  function onDialogOpenChange(isOpen: boolean) {
+    if (approveTransactionState.isLoading || supplyTransactionState.isLoading) {
+      return;
+    }
 
-        setIsDialogOpen(isOpen);
-      }}
-    >
+    if (!isOpen && approveTransactionState.isSuccess && supplyTransactionState.isSuccess) {
+      onSupplyDialogClose();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
       <DialogTrigger asChild>
         <Button className='w-16'>Supply</Button>
       </DialogTrigger>
