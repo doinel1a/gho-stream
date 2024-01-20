@@ -38,13 +38,13 @@ contract BaseTest is Test {
         deal(address(WETH), deployer, 100e18);
         deal(address(DAI), deployer, 100e18);
         deal(address(USDC), deployer, 100e18);
+
+        IERC20(WETH).approve(address(aaveMiniMarket), 100e18);
+        IERC20(DAI).approve(address(aaveMiniMarket), 100e18);
+        IERC20(USDC).approve(address(aaveMiniMarket), 100e18);
     }
 
     function test_aaveMiniMarket() public {
-        IERC20(WETH).approve(address(aaveMiniMarket), 100e18);
-        IERC20(DAI).approve(address(aaveMiniMarket), 100e18);
-        IERC20(USDC).approve(address(aaveMiniMarket), 100e6);
-
         vm.expectRevert();
         aaveMiniMarket.withdraw(WETH, 100e18);
 
@@ -58,6 +58,9 @@ contract BaseTest is Test {
     }
 
     function test_streamBorrow() public {
+        aaveMiniMarket.deposit(DAI, 100e18);
+        aaveMiniMarket.deposit(USDC, 100e6);
+
         aaveMiniMarket.borrowGhoThroughStream(100e18, 1 days, deployer);
 
         skip(12 hours);
@@ -67,9 +70,6 @@ contract BaseTest is Test {
     }
 
     function test_netWorth() public {
-        IERC20(DAI).approve(address(aaveMiniMarket), 100e18);
-        IERC20(USDC).approve(address(aaveMiniMarket), 100e18);
-
         aaveMiniMarket.deposit(DAI, 100e18);
         aaveMiniMarket.deposit(USDC, 100e6);
 
@@ -80,5 +80,13 @@ contract BaseTest is Test {
         uint256 maxBorrowAmount = aaveMiniMarket.getMaxBorrowAmount(deployer);
 
         assertTrue(maxBorrowAmount == 160e18);
+
+        aaveMiniMarket.borrowGhoThroughStream(100e18, 1 days, deployer);
+
+        skip(12 hours);
+
+        netWorth = aaveMiniMarket.getNetWorth(deployer);
+
+        assertTrue(netWorth == 150.5e18);
     }
 }

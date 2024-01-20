@@ -59,6 +59,9 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
         external
         returns (uint256 streamId)
     {
+        require(amount > 0, "Amount must be greater than 0");
+        require(amount <= getMaxBorrowAmount(msg.sender), "Exceeds max borrow amount");
+
         uint256 nextStreamId = SABLIER_LOCKUP_LINEAR.nextStreamId();
 
         _borrowerStreamIds[msg.sender].push(nextStreamId);
@@ -85,18 +88,35 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
     }
 
     function getNetWorth(address user) public view returns (uint256) {
+        return getDepositValue(user) - getRealTimeDebt(user);
+    }
+
+    function getRealTimeDebt(address user) public view returns (uint256) {
+        uint256[] memory streamIds = _borrowerStreamIds[user];
+
+        uint256 realTimeBalance = 0;
+        for (uint256 i = 0; i < streamIds.length; i++) {
+            uint128 streamedAmount = SABLIER_LOCKUP_LINEAR.streamedAmountOf(streamIds[i]);
+
+            realTimeBalance += streamedAmount;
+        }
+
+        return realTimeBalance;
+    }
+
+    function getDepositValue(address user) public view returns (uint256) {
         uint256 tokenLength = _tokenData.length;
-        uint256 netWorth = 0;
+        uint256 depositValue = 0;
         for (uint256 i = 0; i < tokenLength; i++) {
             IERC20Metadata token = IERC20Metadata(_tokenData[i].aToken);
             uint256 userBalance = token.balanceOf(user);
 
-            netWorth += userBalance * _tokenData[i].price / 10 ** token.decimals();
+            depositValue += userBalance * _tokenData[i].price / 10 ** token.decimals();
         }
-        return netWorth;
+        return depositValue;
     }
 
-    function getMaxBorrowAmount(address user) external view returns (uint256) {
+    function getMaxBorrowAmount(address user) public view returns (uint256) {
         uint256 netWorth = getNetWorth(user);
         return netWorth * 80 / 100;
     }
@@ -135,7 +155,7 @@ contract AaveMiniMarket is IGhoFacilitator, Ownable {
             cancelable: true,
             transferable: true,
             durations: LockupLinear.Durations({ cliff: 0, total: duration }),
-            broker: Broker(_ghoTreasury, ud60x18(0.01e18)) // 1% fee
+            broker: Broker(_ghoTreasury, ud60x18(0.01e18)) // 1% fee to treasury
          });
 
         streamId = SABLIER_LOCKUP_LINEAR.createWithDurations(params);
