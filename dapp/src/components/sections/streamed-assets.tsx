@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import type { TStreamedTransactionState } from '@/reducers/streamed-transaction';
 import type { HTMLAttributes } from 'react';
@@ -8,7 +8,8 @@ import { cn, roundDecimal } from '@/lib/utils';
 import ExpandableSecion from '../expandable-section';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import StreamDetailsDialog from './widgets/stream-details-dialog';
+
+const StreamDetailsDialog = React.lazy(() => import('./widgets/stream-details-dialog'));
 
 const tableHeaders = ['Status', 'To', 'Streamed', 'Timeline', ''];
 
@@ -60,7 +61,9 @@ export default function StreamedAssetsSection({
                 </TableCell>
                 <TableCell>{stream.endTime}</TableCell>
                 <TableCell>
-                  <StreamDetailsDialog stream={stream} />
+                  <Suspense fallback={<Skeleton className='h-7 w-7' />}>
+                    <StreamDetailsDialog stream={stream} />
+                  </Suspense>
                 </TableCell>
               </TableRow>
             ))}
