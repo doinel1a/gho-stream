@@ -11,14 +11,6 @@ import tokensContractDetails from '@/config/tokens-contract-details';
 import EReducerState from '@/constants/reducer-state';
 import { cn } from '@/lib/utils';
 import {
-  approveTransactionInitialState,
-  approveTransactionReducer
-} from '@/reducers/approve-transaction';
-import {
-  supplyTransactionInitialState,
-  supplyTransactionReducer
-} from '@/reducers/supply-transaction';
-import {
   withdrawTransactionInitialState,
   withdrawTransactionReducer
 } from '@/reducers/withdraw-transaction';
@@ -28,7 +20,6 @@ import Img from '../img';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
-const SupplyAssetsDialog = React.lazy(() => import('./widgets/supply-assets-dialog'));
 const WithdrawAssetsDialog = React.lazy(() => import('./widgets/withdraw-assets-dialog'));
 
 const tableHeaders = ['Assets', 'Balance', ''];
@@ -48,141 +39,10 @@ export default function SuppliedAssetsSection({
   className,
   ...properties
 }: ISuppliedAssetsSection) {
-  const [approveTransactionState, dispatchApproveTransaction] = useReducer(
-    approveTransactionReducer,
-    approveTransactionInitialState
-  );
-
-  const [supplyTransactionState, dispatchSupplyTransaction] = useReducer(
-    supplyTransactionReducer,
-    supplyTransactionInitialState
-  );
-
   const [withdrawTransactionState, dispatchWithdrawTransaction] = useReducer(
     withdrawTransactionReducer,
     withdrawTransactionInitialState
   );
-
-  async function onApproveClick(contractName: string, amount: string) {
-    dispatchApproveTransaction({
-      state: EReducerState.start,
-      payload: undefined
-    });
-
-    for (const contractDetails of tokensContractDetails) {
-      if (contractName !== contractDetails.name) {
-        continue;
-      }
-
-      const signer = await ethersProvider.getSigner();
-      const tokenContract = new ethers.Contract(
-        contractDetails.address,
-        contractDetails.abi,
-        signer
-      );
-
-      try {
-        const transactionResponse: TransactionResponse = (await tokenContract.approve(
-          aaveContractDetails.address,
-          parseUnits(amount, contractDetails.decimals)
-        )) as TransactionResponse;
-
-        console.log('transactionResponse', transactionResponse);
-
-        const transactionReceipt = await transactionResponse.wait();
-        console.log('transactionReceipt', transactionReceipt);
-
-        if (transactionReceipt) {
-          dispatchApproveTransaction({
-            state: EReducerState.success,
-            payload: undefined
-          });
-        }
-      } catch (error: unknown) {
-        // Ethers error object
-        if (
-          error &&
-          typeof error === 'object' &&
-          'info' in error &&
-          error.info &&
-          typeof error.info === 'object' &&
-          'error' in error.info &&
-          error.info.error &&
-          typeof error.info.error === 'object' &&
-          'code' in error.info.error &&
-          typeof error.info.error.code === 'number'
-        ) {
-          dispatchApproveTransaction({
-            state: EReducerState.error,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            payload: error.info.error.code
-          });
-        }
-
-        console.error('Error approve transaction', error);
-      }
-    }
-  }
-
-  async function onSupplyClick(tokenName: string, amount: string) {
-    dispatchSupplyTransaction({
-      state: EReducerState.start,
-      payload: undefined
-    });
-
-    for (const contractDetails of tokensContractDetails) {
-      if (tokenName !== contractDetails.name) {
-        continue;
-      }
-
-      const signer = await ethersProvider.getSigner();
-      const aaveContract = new ethers.Contract(
-        aaveContractDetails.address,
-        aaveContractDetails.artifacts.abi,
-        signer
-      );
-
-      try {
-        const transactionResponse: TransactionResponse = (await aaveContract.deposit(
-          contractDetails.address,
-          parseUnits(amount, contractDetails.decimals)
-        )) as TransactionResponse;
-
-        console.log('transactionResponse', transactionResponse);
-
-        const transactionReceipt = await transactionResponse.wait();
-        console.log('transactionReceipt', transactionReceipt);
-
-        if (transactionReceipt) {
-          dispatchSupplyTransaction({
-            state: EReducerState.success,
-            payload: undefined
-          });
-        }
-      } catch (error: unknown) {
-        // Ethers error object
-        if (
-          error &&
-          typeof error === 'object' &&
-          'info' in error &&
-          error.info &&
-          typeof error.info === 'object' &&
-          'error' in error.info &&
-          error.info.error &&
-          typeof error.info.error === 'object' &&
-          'code' in error.info.error &&
-          typeof error.info.error.code === 'number'
-        ) {
-          dispatchSupplyTransaction({
-            state: EReducerState.error,
-            payload: error.info.error.code
-          });
-        }
-
-        console.error('Error deposit transaction', error);
-      }
-    }
-  }
 
   async function onWithdrawClick(tokenName: string, amount: string) {
     dispatchWithdrawTransaction({
@@ -286,20 +146,7 @@ export default function SuppliedAssetsSection({
                 <TableCell>
                   <span className='font-semibold'>{token.normalizedBalance}</span>
                 </TableCell>
-                <TableCell className='flex justify-end gap-x-2.5'>
-                  <Suspense fallback={<Skeleton className='h-10 w-16' />}>
-                    <SupplyAssetsDialog
-                      token={token}
-                      approveTransactionState={approveTransactionState}
-                      supplyTransactionState={supplyTransactionState}
-                      onApproveClick={onApproveClick}
-                      onSupplyClick={onSupplyClick}
-                      onSupplyDialogClose={onSupplyOrWithdrawDialogClose}
-                      dispatchApproveTransaction={dispatchApproveTransaction}
-                      dispatchSupplyTransaction={dispatchSupplyTransaction}
-                    />
-                  </Suspense>
-
+                <TableCell className='flex justify-end'>
                   <Suspense fallback={<Skeleton className='h-10 w-20' />}>
                     <WithdrawAssetsDialog
                       token={token}
