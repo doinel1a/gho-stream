@@ -19,7 +19,7 @@ export default function WalletButton({ className, ...properties }: IWalletButton
 
   return (
     <Button
-      variant='secondary'
+      variant={isConnected ? 'secondary' : 'default'}
       className={cn(className)}
       onClick={() => setOpen(true)}
       {...properties}
