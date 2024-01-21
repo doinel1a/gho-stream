@@ -1,10 +1,11 @@
 const config = {
   metadata: {
-    title: 'Vite React.js TypeScript & Shadcn/ui — Template',
+    title: 'GhoStream by DeFi Builder',
     description:
-      'Boilerplate template designed to quickly bootstrap a React.js Web App, SPA, website or landing page with TypeScript, Shadcn/ui, TailwindCSS, Vite, SWC, ESLint, Husky and much more in just 30 seconds.',
+      'A platform where users supply collateral to borrow GHO in a stream, aligning with income flow for new payment use cases. This method gradually mints GHO, reducing risk, and unlocks innovative streaming payment possibilities within a secure framework.',
     keywords:
-      'react.js, react.js-template, react.js-boilerplate, typescript, shadcn/ui, tailwindcss, vite, swc, eslint, prettier, husky, commitlint, lint-staged'
+      'react.js, typescript, shadcn/ui, tailwindcss, vite, ethereum, solidity, ethers.js, family connectkit, wagmi, viem, foundry, aave, gho, stablecoin, sablier, stream',
+    url: 'https://gho-stream.d1a.app'
   },
   server: {
     host: 'localhost',

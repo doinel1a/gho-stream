@@ -1,17 +1,17 @@
 import React from 'react';
 
-import { Link } from 'react-router-dom';
+import ExternalAnchor from './external-anchor';
 
 export default function Footer() {
-  const year = new Date().getFullYear();
+  const year = 2024;
 
   return (
     <footer className='flex h-10 w-full items-center justify-center border-t border-border text-sm'>
-      by &nbsp;
-      <Link to='https://business-link.d1a.app' className='text-primary'>
-        doinel1a
-      </Link>
-      &nbsp; {year}
+      Made by &nbsp;
+      <ExternalAnchor href='https://defibuilder.com/' className='text-primary'>
+        DeFi Builder
+      </ExternalAnchor>
+      &nbsp; at LFGHO hackathon &nbsp; {year}
     </footer>
   );
 }
