@@ -510,6 +510,17 @@ export default function HomePage() {
       });
     }
 
+    if (typeof memorizedGetSuppliedBalance === 'function') {
+      memorizedGetSuppliedBalance().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching supplied balance', error);
+      });
+    }
+
     if (typeof memorizedGetMaxAmountToBorrow === 'function') {
       memorizedGetMaxAmountToBorrow().catch((error: unknown) => {
         dispatchSuppliedTransaction({
@@ -547,6 +558,17 @@ export default function HomePage() {
 
     if (typeof memorizedGetNetWorth === 'function') {
       memorizedGetNetWorth().catch((error: unknown) => {
+        dispatchSuppliedTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        console.error('Error fetching net worth', error);
+      });
+    }
+
+    if (typeof memorizedGetStreamedBalance === 'function') {
+      memorizedGetStreamedBalance().catch((error: unknown) => {
         dispatchSuppliedTransaction({
           state: EReducerState.error,
           payload: undefined
