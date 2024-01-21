@@ -6,6 +6,7 @@ import type { Eip1193Provider, TransactionResponse } from 'ethers';
 
 import { format } from 'date-fns';
 import { BrowserProvider, ethers, formatUnits } from 'ethers';
+import { AlertTriangle } from 'lucide-react';
 import { useAccount } from 'wagmi';
 
 import Header from '@/components/header';
@@ -40,6 +41,8 @@ import {
   suppliedTransactionReducer
 } from '@/reducers/supplied-transaction';
 import { walletAssetsInitialState, walletAssetsReducer } from '@/reducers/wallet-assets';
+
+const WalletButton = React.lazy(() => import('@/components/wallet-button'));
 
 const SupplyAssetsSection = React.lazy(() => import('@/components/sections/supply-assets'));
 const SuppliedAssetsSection = React.lazy(() => import('@/components/sections/supplied-assets'));
@@ -554,58 +557,69 @@ export default function HomePage() {
 
   return (
     <>
-      <Header netWorthTransactionState={netWorthTransactionState} />
-
       {ethersProvider ? (
         isConnected ? (
-          <div className='flex w-full items-start gap-5'>
-            <div className='flex w-1/2 flex-col gap-5'>
-              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
-                <SuppliedAssetsSection
-                  ethersProvider={ethersProvider}
-                  suppliedTransactionState={suppliedTransactionState}
-                  suppliedBalance={suppliedBalanceTransactionState.balance ?? 0}
-                  className='w-full'
-                  defaultExpanded
-                  onSupplyOrWithdrawDialogClose={onSupplyOrWithdrawDialogClose}
-                />
-              </Suspense>
+          <>
+            <Header netWorthTransactionState={netWorthTransactionState} />
 
-              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
-                <SupplyAssetsSection
-                  ethersProvider={ethersProvider}
-                  walletAssetsState={walletAssetsState}
-                  className='w-full'
-                  defaultExpanded
-                  onSupplyDialogClose={onSupplyOrWithdrawDialogClose}
-                />
-              </Suspense>
+            <div className='flex w-full items-start gap-5'>
+              <div className='flex w-1/2 flex-col gap-5'>
+                <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                  <SuppliedAssetsSection
+                    ethersProvider={ethersProvider}
+                    suppliedTransactionState={suppliedTransactionState}
+                    suppliedBalance={suppliedBalanceTransactionState.balance ?? 0}
+                    className='w-full'
+                    defaultExpanded
+                    onSupplyOrWithdrawDialogClose={onSupplyOrWithdrawDialogClose}
+                  />
+                </Suspense>
+
+                <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                  <SupplyAssetsSection
+                    ethersProvider={ethersProvider}
+                    walletAssetsState={walletAssetsState}
+                    className='w-full'
+                    defaultExpanded
+                    onSupplyDialogClose={onSupplyOrWithdrawDialogClose}
+                  />
+                </Suspense>
+              </div>
+
+              <div className='flex w-1/2 flex-col gap-5'>
+                <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                  <StreamedAssetsSection
+                    streamedTransactionState={streamedTransactionState}
+                    streamedBalance={streamedBalanceTransactionState.balance ?? 0}
+                    className='w-full'
+                    defaultExpanded
+                  />
+                </Suspense>
+
+                <Suspense fallback={<Skeleton className='h-52 w-full' />}>
+                  <AssetsToStreamSection
+                    ethersProvider={ethersProvider}
+                    maxAmountToBorrowTransactionState={maxAmountToBorrowTransactionState}
+                    className='w-full'
+                    defaultExpanded
+                    onStreamDialogClose={onStreamDialogClose}
+                  />
+                </Suspense>
+              </div>
             </div>
-
-            <div className='flex w-1/2 flex-col gap-5'>
-              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
-                <StreamedAssetsSection
-                  streamedTransactionState={streamedTransactionState}
-                  streamedBalance={streamedBalanceTransactionState.balance ?? 0}
-                  className='w-full'
-                  defaultExpanded
-                />
-              </Suspense>
-
-              <Suspense fallback={<Skeleton className='h-52 w-full' />}>
-                <AssetsToStreamSection
-                  ethersProvider={ethersProvider}
-                  maxAmountToBorrowTransactionState={maxAmountToBorrowTransactionState}
-                  className='w-full'
-                  defaultExpanded
-                  onStreamDialogClose={onStreamDialogClose}
-                />
-              </Suspense>
-            </div>
-          </div>
+          </>
         ) : (
-          <div>
-            <h1 className='text-2xl'>Connect your wallet!</h1>
+          <div className='flex h-full flex-col items-center justify-center'>
+            <AlertTriangle className='mb-2.5 h-16 w-16 text-yellow-400' />
+
+            <h1 className='text-2xl font-bold'>Connect your Wallet</h1>
+            <h2 className='mb-5 text-lg text-muted-foreground'>
+              Connect your Wallet to see your supplies, borrowings, and open positions
+            </h2>
+
+            <Suspense fallback={<Skeleton className='h-10 w-40' />}>
+              <WalletButton className='w-40' />
+            </Suspense>
           </div>
         )
       ) : (
