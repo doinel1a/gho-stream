@@ -94,7 +94,7 @@ export default function HomePage() {
   }, []);
 
   const memoizedGetWalletAssets = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -134,7 +134,7 @@ export default function HomePage() {
         payload: walletAssets
       });
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memoizedGetWalletAssets === 'function') {
@@ -150,7 +150,7 @@ export default function HomePage() {
   }, [memoizedGetWalletAssets]);
 
   const memorizedGetSuppliedAssets = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -191,7 +191,7 @@ export default function HomePage() {
         payload: suppliedAssets
       });
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memorizedGetSuppliedAssets === 'function') {
@@ -208,7 +208,7 @@ export default function HomePage() {
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   const memorizedGetStreamedAssets = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -280,7 +280,7 @@ export default function HomePage() {
         payload: streamedAssets
       });
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memorizedGetStreamedAssets === 'function') {
@@ -296,7 +296,7 @@ export default function HomePage() {
   }, [memorizedGetStreamedAssets]);
 
   const memorizedGetNetWorth = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -323,7 +323,7 @@ export default function HomePage() {
 
       console.log('netWorthResponse', formatUnits(netWorthResponse, 18));
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memorizedGetNetWorth === 'function') {
@@ -340,7 +340,7 @@ export default function HomePage() {
   }, [memorizedGetNetWorth]);
 
   const memorizedGetMaxAmountToBorrow = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -367,7 +367,7 @@ export default function HomePage() {
 
       console.log('maxAmountToBorrowResponse', formatUnits(maxAmountToBorrowResponse, 18));
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memorizedGetMaxAmountToBorrow === 'function') {
@@ -384,7 +384,7 @@ export default function HomePage() {
   }, [memorizedGetMaxAmountToBorrow]);
 
   const memorizedGetSuppliedBalance = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -411,7 +411,7 @@ export default function HomePage() {
 
       console.log('suppliedBalanceResponse', formatUnits(suppliedBalanceResponse, 18));
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memorizedGetSuppliedBalance === 'function') {
@@ -428,7 +428,7 @@ export default function HomePage() {
   }, [memorizedGetSuppliedBalance]);
 
   const memorizedGetStreamedBalance = useMemo(() => {
-    if (!ethersProvider) {
+    if (!ethersProvider || !isConnected) {
       return undefined;
     }
 
@@ -455,7 +455,7 @@ export default function HomePage() {
 
       console.log('streamedBalanceResponse', formatUnits(streamedBalanceResponse, 18));
     };
-  }, [ethersProvider, address]);
+  }, [ethersProvider, isConnected, address]);
 
   useEffect(() => {
     if (typeof memorizedGetStreamedBalance === 'function') {
