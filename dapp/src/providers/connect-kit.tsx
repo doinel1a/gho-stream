@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable sonarjs/no-duplicate-string */
 
@@ -16,10 +17,10 @@ const chains = [sepolia];
 
 export const config = createConfig(
   getDefaultConfig({
-    appName: configuration.default.metadata.title as string,
-    appDescription: configuration.default.metadata.description as string,
-    appIcon: `${configuration.default.metadata.url}/favicon/gho-stream-logo.png`,
-    appUrl: configuration.default.metadata.url as string,
+    appName: configuration.default.metadata.title,
+    appDescription: configuration.default.metadata.description,
+    appIcon: `https://${configuration.default.metadata.domain}/favicon/gho-stream-logo.png`,
+    appUrl: `https://${configuration.default.metadata.domain}`,
     chains,
     walletConnectProjectId: (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? '') as string
   })
