@@ -24,6 +24,10 @@ import {
   netWorthTransactionReducer
 } from '@/reducers/net-worth-transaction';
 import {
+  streamedBalanceTransactionInitialState,
+  streamedBalanceTransactionReducer
+} from '@/reducers/streamed-balance-transaction';
+import {
   streamedTransactionInitialState,
   streamedTransactionReducer
 } from '@/reducers/streamed-transaction';
@@ -75,6 +79,11 @@ export default function HomePage() {
   const [suppliedBalanceTransactionState, dispatchSuppliedBalanceTransaction] = useReducer(
     suppliedBalanceTransactionReducer,
     suppliedBalanceTransactionInitialState
+  );
+
+  const [streamedBalanceTransactionState, dispatchStreamedBalanceTransaction] = useReducer(
+    streamedBalanceTransactionReducer,
+    streamedBalanceTransactionInitialState
   );
 
   useEffect(() => {
@@ -418,6 +427,50 @@ export default function HomePage() {
     }
   }, [memorizedGetSuppliedBalance]);
 
+  const memorizedGetStreamedBalance = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
+    return async function getStreamedBalance() {
+      dispatchStreamedBalanceTransaction({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.artifacts.abi,
+        ethersProvider
+      );
+
+      const streamedBalanceResponse = (await aaveContract.getRealTimeDebt(address)) as bigint;
+
+      if (streamedBalanceResponse) {
+        dispatchStreamedBalanceTransaction({
+          state: EReducerState.success,
+          payload: roundDecimal(Number(formatUnits(streamedBalanceResponse, 18)), 2)
+        });
+      }
+
+      console.log('streamedBalanceResponse', formatUnits(streamedBalanceResponse, 18));
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    if (typeof memorizedGetStreamedBalance === 'function') {
+      memorizedGetStreamedBalance().catch((error: unknown) => {
+        dispatchStreamedBalanceTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        // eslint-disable-next-line sonarjs/no-duplicate-string
+        console.error('Error fetching streamed balance', error);
+      });
+    }
+  }, [memorizedGetStreamedBalance]);
+
   async function onSupplyOrWithdrawDialogClose() {
     if (typeof memoizedGetWalletAssets === 'function') {
       memoizedGetWalletAssets().catch((error: unknown) => {
@@ -533,6 +586,7 @@ export default function HomePage() {
               <Suspense fallback={<Skeleton className='h-52 w-full' />}>
                 <StreamedAssetsSection
                   streamedTransactionState={streamedTransactionState}
+                  streamedBalance={streamedBalanceTransactionState.balance ?? 0}
                   className='w-full'
                   defaultExpanded
                 />

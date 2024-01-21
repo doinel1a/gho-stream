@@ -15,11 +15,13 @@ const tableHeaders = ['Status', 'To', 'Streamed', 'Timeline', ''];
 
 interface IStreamedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   streamedTransactionState: TStreamedTransactionState;
+  streamedBalance: number;
   defaultExpanded?: boolean;
 }
 
 export default function StreamedAssetsSection({
   streamedTransactionState,
+  streamedBalance,
   defaultExpanded,
   className,
   ...properties
@@ -28,6 +30,7 @@ export default function StreamedAssetsSection({
     <ExpandableSecion
       title='Your streams'
       className={cn('flex w-full flex-col gap-y-2.5', className)}
+      balance={streamedBalance}
       defaultExpanded={defaultExpanded}
       {...properties}
     >
