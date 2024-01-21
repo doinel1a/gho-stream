@@ -27,6 +27,7 @@ const tableHeaders = ['Assets', 'Balance', ''];
 interface ISuppliedAssetsSection extends HTMLAttributes<HTMLDivElement> {
   ethersProvider: BrowserProvider;
   suppliedTransactionState: TSuppliedTransactionState;
+  suppliedBalance: number;
   defaultExpanded?: boolean;
   onSupplyOrWithdrawDialogClose: () => void;
 }
@@ -34,6 +35,7 @@ interface ISuppliedAssetsSection extends HTMLAttributes<HTMLDivElement> {
 export default function SuppliedAssetsSection({
   ethersProvider,
   suppliedTransactionState,
+  suppliedBalance,
   defaultExpanded,
   onSupplyOrWithdrawDialogClose,
   className,
@@ -108,6 +110,7 @@ export default function SuppliedAssetsSection({
     <ExpandableSecion
       title='Your supplies'
       className={cn('flex w-full flex-col gap-y-2.5', className)}
+      balance={suppliedBalance}
       defaultExpanded={defaultExpanded}
       {...properties}
     >

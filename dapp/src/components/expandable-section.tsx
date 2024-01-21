@@ -10,6 +10,7 @@ import { Button } from './ui/button';
 
 interface IExpandableSecion extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
   title: string;
+  balance?: number;
   defaultExpanded?: boolean;
 }
 
@@ -17,6 +18,7 @@ export default function ExpandableSecion({
   title,
   children,
   className,
+  balance,
   defaultExpanded,
   ...properties
 }: IExpandableSecion) {
@@ -45,6 +47,16 @@ export default function ExpandableSecion({
           )}
         </Button>
       </div>
+
+      {balance ? (
+        <div className='flex w-min gap-x-1 rounded-md border p-1 text-sm text-muted-foreground'>
+          <span className=''>Balance</span>
+          {/* Dollar sign code */}
+          <span className='font-semibold'>&#36;</span>
+          <span className='font-semibold text-secondary-foreground'>{balance}</span>
+        </div>
+      ) : null}
+
       {isSectionExpaned && <>{children}</>}
     </section>
   );

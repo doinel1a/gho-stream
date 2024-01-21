@@ -28,6 +28,10 @@ import {
   streamedTransactionReducer
 } from '@/reducers/streamed-transaction';
 import {
+  suppliedBalanceTransactionInitialState,
+  suppliedBalanceTransactionReducer
+} from '@/reducers/supplied-balance-transaction';
+import {
   suppliedTransactionInitialState,
   suppliedTransactionReducer
 } from '@/reducers/supplied-transaction';
@@ -66,6 +70,11 @@ export default function HomePage() {
   const [maxAmountToBorrowTransactionState, dispatchMaxAmountToBorrowTransaction] = useReducer(
     maxAmountToBorrowTransactionReducer,
     maxAmountToBorrowTransactionInitialState
+  );
+
+  const [suppliedBalanceTransactionState, dispatchSuppliedBalanceTransaction] = useReducer(
+    suppliedBalanceTransactionReducer,
+    suppliedBalanceTransactionInitialState
   );
 
   useEffect(() => {
@@ -365,6 +374,50 @@ export default function HomePage() {
     }
   }, [memorizedGetMaxAmountToBorrow]);
 
+  const memorizedGetSuppliedBalance = useMemo(() => {
+    if (!ethersProvider) {
+      return undefined;
+    }
+
+    return async function getSuppliedBalance() {
+      dispatchSuppliedBalanceTransaction({
+        state: EReducerState.start,
+        payload: undefined
+      });
+
+      const aaveContract = new ethers.Contract(
+        aaveContractDetails.address,
+        aaveContractDetails.artifacts.abi,
+        ethersProvider
+      );
+
+      const suppliedBalanceResponse = (await aaveContract.getDepositValue(address)) as bigint;
+
+      if (suppliedBalanceResponse) {
+        dispatchSuppliedBalanceTransaction({
+          state: EReducerState.success,
+          payload: roundDecimal(Number(formatUnits(suppliedBalanceResponse, 18)), 2)
+        });
+      }
+
+      console.log('suppliedBalanceResponse', formatUnits(suppliedBalanceResponse, 18));
+    };
+  }, [ethersProvider, address]);
+
+  useEffect(() => {
+    if (typeof memorizedGetSuppliedBalance === 'function') {
+      memorizedGetSuppliedBalance().catch((error: unknown) => {
+        dispatchSuppliedBalanceTransaction({
+          state: EReducerState.error,
+          payload: undefined
+        });
+
+        // eslint-disable-next-line sonarjs/no-duplicate-string
+        console.error('Error fetching supplied balance', error);
+      });
+    }
+  }, [memorizedGetSuppliedBalance]);
+
   async function onSupplyOrWithdrawDialogClose() {
     if (typeof memoizedGetWalletAssets === 'function') {
       memoizedGetWalletAssets().catch((error: unknown) => {
@@ -458,6 +511,7 @@ export default function HomePage() {
                 <SuppliedAssetsSection
                   ethersProvider={ethersProvider}
                   suppliedTransactionState={suppliedTransactionState}
+                  suppliedBalance={suppliedBalanceTransactionState.balance ?? 0}
                   className='w-full'
                   defaultExpanded
                   onSupplyOrWithdrawDialogClose={onSupplyOrWithdrawDialogClose}
