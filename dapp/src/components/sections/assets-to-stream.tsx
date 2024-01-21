@@ -19,6 +19,7 @@ import {
 
 import ExpandableSecion from '../expandable-section';
 import Img from '../img';
+import InfoBanner from '../info-banner';
 import { Skeleton } from '../ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
@@ -113,9 +114,9 @@ export default function AssetsToStreamSection({
       ) : !maxAmountToBorrowTransactionState.maxAmount ||
         (maxAmountToBorrowTransactionState.isSuccess &&
           maxAmountToBorrowTransactionState.maxAmount === 0) ? (
-        <div className=''>
-          <p className='text-muted-foreground'>Supply assets as collateral in order to borrow</p>
-        </div>
+        <InfoBanner className='py-3.5'>
+          <div>Supply assets as collateral in order to borrow</div>
+        </InfoBanner>
       ) : (
         <Table>
           <TableHeader>

@@ -319,7 +319,7 @@ export default function HomePage() {
 
       const netWorthResponse = (await aaveContract.getNetWorth(address)) as bigint;
 
-      if (netWorthResponse) {
+      if (netWorthResponse !== null && netWorthResponse !== undefined) {
         dispatchNetWorthTransaction({
           state: EReducerState.success,
           payload: roundDecimal(Number(formatUnits(netWorthResponse, 18)), 2)
@@ -363,7 +363,7 @@ export default function HomePage() {
 
       const maxAmountToBorrowResponse = (await aaveContract.getMaxBorrowAmount(address)) as bigint;
 
-      if (maxAmountToBorrowResponse) {
+      if (maxAmountToBorrowResponse !== null && maxAmountToBorrowResponse !== undefined) {
         dispatchMaxAmountToBorrowTransaction({
           state: EReducerState.success,
           payload: roundDecimal(Number(formatUnits(maxAmountToBorrowResponse, 18)), 2)
