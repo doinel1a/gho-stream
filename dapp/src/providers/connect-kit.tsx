@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable sonarjs/no-duplicate-string */
 
 import React from 'react';
@@ -8,16 +9,17 @@ import { ConnectKitProvider as FamilyConnectKitProvider, getDefaultConfig } from
 import { createConfig, WagmiConfig } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 
+import * as configuration from '../../_config';
 import { useTheme } from './theme';
 
 const chains = [sepolia];
 
 export const config = createConfig(
   getDefaultConfig({
-    appName: 'Your App Name',
-    appDescription: 'Your App Description',
-    appIcon: 'https://family.co/logo.png',
-    appUrl: 'https://family.co',
+    appName: configuration.default.metadata.title as string,
+    appDescription: configuration.default.metadata.description as string,
+    appIcon: `${configuration.default.metadata.url}/favicon/gho-stream-logo.png`,
+    appUrl: configuration.default.metadata.url as string,
     chains,
     walletConnectProjectId: (import.meta.env.VITE_WALLETCONNECT_PROJECT_ID ?? '') as string
   })
