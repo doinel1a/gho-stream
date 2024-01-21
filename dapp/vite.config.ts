@@ -10,8 +10,8 @@ import config from './_config';
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+      '@': path.resolve(__dirname, './src')
+    }
   },
   plugins: [
     react(),
@@ -24,7 +24,8 @@ export default defineConfig({
         return html
           .replace(/%TITLE%/g, config.metadata.title)
           .replace(/%DESCRIPTION%/g, config.metadata.description)
-          .replace(/%KEYWORDS%/g, config.metadata.keywords);
+          .replace(/%KEYWORDS%/g, config.metadata.keywords)
+          .replace(/%DOMAIN%/g, config.metadata.domain);
       }
     }
   ],
