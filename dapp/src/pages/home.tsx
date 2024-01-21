@@ -6,10 +6,12 @@ import type { Eip1193Provider, TransactionResponse } from 'ethers';
 
 import { format } from 'date-fns';
 import { BrowserProvider, ethers, formatUnits } from 'ethers';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, ShieldAlert, ShieldX } from 'lucide-react';
 import { useAccount } from 'wagmi';
 
+import ExternalAnchor from '@/components/external-anchor';
 import Header from '@/components/header';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import aaveContractDetails from '@/config/aave-contract-details';
 import sablierContractDetails from '@/config/sablier-contract-details';
@@ -610,7 +612,7 @@ export default function HomePage() {
           </>
         ) : (
           <div className='flex h-full flex-col items-center justify-center'>
-            <AlertTriangle className='mb-2.5 h-16 w-16 text-yellow-400' />
+            <ShieldAlert className='mb-2.5 h-16 w-16 text-yellow-400' />
 
             <h1 className='text-2xl font-bold'>Connect your Wallet</h1>
             <h2 className='mb-5 text-lg text-muted-foreground'>
@@ -623,8 +625,19 @@ export default function HomePage() {
           </div>
         )
       ) : (
-        <div>
-          <h1 className='text-2xl'>install a wallet!</h1>
+        <div className='flex h-full flex-col items-center justify-center'>
+          <ShieldX className='mb-2.5 h-16 w-16 text-destructive' />
+
+          <h1 className='text-2xl font-bold'>Get a Wallet</h1>
+          <h2 className='mb-5 text-lg text-muted-foreground'>
+            It looks like you don&apos;t have a Wallet
+          </h2>
+
+          <Button asChild>
+            <ExternalAnchor href='https://ethereum.org/en/wallets/find-wallet'>
+              Choose your first Wallet
+            </ExternalAnchor>
+          </Button>
         </div>
       )}
     </>
